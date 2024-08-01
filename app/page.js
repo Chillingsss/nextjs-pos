@@ -1,113 +1,231 @@
-import Image from "next/image";
+"use client";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import React, { useState, useEffect } from 'react';
+import { ModeToggle } from "@/components/ui/mode-toggle";
+import Barcode from "./barcode";
+import KeybindsTable from "./keybinds-table";
+import { toast } from "sonner";
+import Report from "./reports";
 
-export default function Home() {
+function Page() {
+  const products = [
+    { barcode: "1001", product: "Instant Noodles", price: 55 },
+    { barcode: "1002", product: "Canned Tuna", price: 72 },
+    { barcode: "1003", product: "Rice (1kg)", price: 45 },
+    { barcode: "1004", product: "Milk (1L)", price: 60 },
+    { barcode: "1005", product: "Eggs (12 pcs)", price: 95 },
+    { barcode: "1006", product: "Bread (Loaf)", price: 40 },
+    { barcode: "1007", product: "Cooking Oil (500ml)", price: 85 },
+    { barcode: "1008", product: "Sugar (1kg)", price: 50 },
+    { barcode: "1009", product: "Coffee (200g)", price: 150 },
+    { barcode: "1010", product: "Soy Sauce (500ml)", price: 38 },
+  ];
+
+  const [transactionForToday, setTransactionForToday] = useState([]);
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [isCashInputVisible, setIsCashInputVisible] = useState(false);
+  const [isChangeVisible, setIsChangeVisible] = useState(false);
+  const [cashTendered, setCashTendered] = useState("");
+  const [customerChange, setCustomerChange] = useState(0);
+  const [isReportVisible, setIsReportVisible] = useState(false);
+
+  const handleAddProduct = (newProductSelected) => {
+    const product = products.find(product => product.barcode === newProductSelected.barcode);
+    if (product) {
+      setSelectedProducts([...selectedProducts, { product: product.product, quantity: parseInt(newProductSelected.quantity), price: product.price }]);
+      setTotal(total + product.price * parseInt(newProductSelected.quantity));
+      toast.success("Product added");
+    } else {
+      toast.error("Product not found");
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.ctrlKey && event.key === 'F2') {
+        if (selectedProducts.length > 0) {
+          setIsCashInputVisible(!isCashInputVisible);
+        } else {
+          toast.error("No product selected yet");
+        }
+      } else if (isCashInputVisible && event.key === 'Enter') {
+        if (parseInt(cashTendered) >= total) {
+          setIsChangeVisible(true);
+          setCustomerChange(parseInt(cashTendered) - total);
+          toast.success("Successfully paid");
+        } else {
+          toast.error("Insufficient cash");
+        }
+      } else if (event.ctrlKey && event.key === 'F9') {
+        if (selectedProducts.length > 0 && total > 0 && cashTendered !== "") {
+          setTransactionForToday([...transactionForToday, { selectedProducts }]);
+        }
+        setIsChangeVisible(false);
+        setIsCashInputVisible(false);
+        setSelectedProducts([]);
+        setTotal(0);
+        setCashTendered("");
+        setCustomerChange(0);
+        toast.success("Transaction reset");
+      } else if (event.ctrlKey && event.key === 'F3') {
+        setIsReportVisible(!isReportVisible);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [cashTendered, isCashInputVisible, isReportVisible, selectedProducts, total, transactionForToday]);
+  const computeQuantities = () => {
+    const quantityMap = products.reduce((acc, product) => {
+      acc[product.product] = 0;
+      return acc;
+    }, {});
+
+    transactionForToday.forEach(transaction => {
+      transaction.selectedProducts.forEach(product => {
+        if (quantityMap[product.product] !== undefined) {
+          quantityMap[product.product] += product.quantity;
+        }
+      });
+    });
+
+    return Object.keys(quantityMap).map(product => ({
+      product,
+      quantity: quantityMap[product]
+    }));
+  };
+
+  const chartData = computeQuantities();
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <>
+      <div className="flex min-h-screen w-full flex-col bg-muted/40">
+        <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+          <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
+
+            <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
+              <header>
+                <ModeToggle />
+                <Barcode handleAddProduct={handleAddProduct} />
+              </header>
+              <Card x-chunk="dashboard-05-chunk-3">
+                <CardHeader className="px-7">
+                  <CardTitle>Orders</CardTitle>
+                  <CardDescription>
+                    Recent orders from your store.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Table >
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="hidden sm:table-cell">Product</TableHead>
+                        <TableHead className="hidden sm:table-cell">Price</TableHead>
+                        <TableHead className="hidden sm:table-cell">Quantity</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {selectedProducts.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center">
+                            No products selected yet
+                          </TableCell>
+                        </TableRow>
+                      )}
+                      {selectedProducts.map((product, index) => (
+                        <TableRow key={index}>
+                          <TableCell className="hidden sm:table-cell">{product.product}</TableCell>
+                          <TableCell className="hidden sm:table-cell">{product.price}<span> Php</span></TableCell>
+                          <TableCell className="hidden sm:table-cell">{product.quantity}</TableCell>
+                          <TableCell className="text-right">{product.price * product.quantity} <span>Php</span></TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+
+              {isReportVisible && (
+                <Report chartData={chartData} />
+              )
+
+              }
+
+            </div>
+
+            <div className="mt-2">
+              <Card className="overflow-hidden mt-16" x-chunk="dashboard-05-chunk-4">
+                <CardContent className="p-6 text-sm">
+                  <div className="grid gap-3">
+                    <div className="font-semibold text-2xl">Order Summary</div>
+                    <Separator className="my-2" />
+                    <ul className="grid gap-3">
+                      <li className="flex items-center justify-between font-semibold">
+                        <span className="text-muted-foreground text-xl">Total</span>
+                        <span className="text-muted-foreground text-xl">{total} <span>Php</span></span>
+                      </li>
+                      {isCashInputVisible && (
+                        <>
+                          <li className="flex items-center justify-between font-semibold">
+                            <span className="text-muted-foreground text-xl">Customer Cash Tendered</span>
+                            <span className="text-muted-foreground text-xl">
+                              <Input
+                                type="text"
+                                placeholder="Enter cash tendered"
+                                value={cashTendered}
+                                onChange={(e) => setCashTendered(e.target.value)}
+                                className="w-full border p-1"
+                                autoFocus
+                              />
+                            </span>
+                          </li>
+                          {isChangeVisible && (
+                            <>
+                              <Separator className="my-2" />
+
+                              <li className="flex items-center justify-between font-semibold">
+                                <span className="text-muted-foreground text-xl">Change</span>
+                                <span className="text-muted-foreground text-xl">
+                                  {customerChange}
+                                  <span> Php</span>
+                                </span>
+                              </li>
+                            </>
+                          )}
+                        </>
+                      )}
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <KeybindsTable />
+            </div>
+          </main>
         </div>
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    </>
   );
 }
+
+export default Page;
