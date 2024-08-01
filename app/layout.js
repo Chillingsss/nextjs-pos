@@ -9,6 +9,7 @@ export const metadata = {
 };
 
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "sonner";
 
 export default function RootLayout({ children }) {
   return (
@@ -16,6 +17,7 @@ export default function RootLayout({ children }) {
       <html lang="en" suppressHydrationWarning>
         <head />
         <body>
+          <Toaster richColors position='top-center' duration={1500} />
           <ThemeProvider
             attribute="class"
             defaultTheme="system"

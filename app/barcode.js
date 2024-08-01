@@ -1,4 +1,3 @@
-"use client"
 import React, { useState, useEffect, useRef } from 'react'
 import {
   AlertDialog,
@@ -18,12 +17,14 @@ const formSchema = z.object({
   barcode: z.string().min(1, {
     message: "This field is required",
   }),
-  quantity: z.string().min(1, {
-    message: "This field is required",
-  }),
+  quantity: z.string()
+    .min(1, { message: "Quantity is required" })
+    .refine(value => !isNaN(Number(value)), { message: "Quantity must be a number" })
+    .refine(value => Number(value) > 0, { message: "Quantity must be greater than 0" })
+    .refine(value => Number.isInteger(Number(value)), { message: "Quantity must be an integer" }),
 })
 
-export default function Barcode() {
+export default function Barcode({ handleAddProduct }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const form = useForm({
@@ -34,11 +35,20 @@ export default function Barcode() {
     },
   })
 
-  const inputRef = useRef(null)
+  const barcodeRef = useRef(null)
 
   const onSubmit = async (values) => {
     console.log(values)
-    setIsDialogOpen(false)
+    handleAddProduct(values)
+    form.reset({
+      barcode: "",
+      quantity: "",
+    })
+    setTimeout(() => {
+      if (barcodeRef.current) {
+        barcodeRef.current.focus()
+      }
+    }, 0)
   }
 
   useEffect(() => {
@@ -55,15 +65,18 @@ export default function Barcode() {
   }, [])
 
   useEffect(() => {
-    if (isDialogOpen && inputRef.current) {
-      inputRef.current.focus()
+    if (isDialogOpen && barcodeRef.current) {
+      barcodeRef.current.focus()
     }
   }, [isDialogOpen])
 
-  const handleKeyDown = (event) => {
+  const handleKeyDown = async (event) => {
     if (event.key === 'Enter') {
-      event.preventDefault() 
-      form.handleSubmit(onSubmit)() 
+      event.preventDefault()
+      const isValid = await form.trigger()
+      if (isValid) {
+        form.handleSubmit(onSubmit)()
+      }
     }
   }
 
@@ -75,16 +88,17 @@ export default function Barcode() {
         <AlertDialogHeader>
           <AlertDialogTitle>Enter Barcode</AlertDialogTitle>
           <AlertDialogDescription>
-            <Form {...form}>
+            <Form {...form} className="space-y-8">
               <form onKeyDown={handleKeyDown} onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <FormField
                   control={form.control}
                   name="barcode"
                   render={({ field }) => (
                     <FormItem>
+                      <FormLabel>Barcode</FormLabel>
                       <FormControl>
                         <Input
-                          ref={inputRef}
+                          ref={barcodeRef}
                           placeholder="Enter your barcode"
                           {...field}
                           autoFocus
@@ -99,8 +113,13 @@ export default function Barcode() {
                   name="quantity"
                   render={({ field }) => (
                     <FormItem>
+                      <FormLabel>Quantity</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter quantity" {...field} />
+                        <Input
+                          type="text"  
+                          placeholder="Enter quantity"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
