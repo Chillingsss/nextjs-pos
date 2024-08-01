@@ -44,6 +44,7 @@ function Page() {
   const [isChangeVisible, setIsChangeVisible] = useState(false);
   const [cashTendered, setCashTendered] = useState("");
   const [customerChange, setCustomerChange] = useState(0);
+  const [isReportVisible, setIsReportVisible] = useState(false);
 
   const handleAddProduct = (newProductSelected) => {
     const product = products.find(product => product.barcode === newProductSelected.barcode);
@@ -83,8 +84,8 @@ function Page() {
         setCashTendered("");
         setCustomerChange(0);
         toast.success("Transaction reset");
-      } else if (event.key === 'F8') {
-        console.log("transaction for today" + JSON.stringify(transactionForToday));
+      } else if (event.ctrlKey && event.key === 'F3') {
+        setIsReportVisible(!isReportVisible);
       }
     };
 
@@ -92,7 +93,7 @@ function Page() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [cashTendered, isCashInputVisible, selectedProducts, total, transactionForToday]);
+  }, [cashTendered, isCashInputVisible, isReportVisible, selectedProducts, total, transactionForToday]);
   const computeQuantities = () => {
     const quantityMap = products.reduce((acc, product) => {
       acc[product.product] = 0;
@@ -126,7 +127,6 @@ function Page() {
                 <ModeToggle />
                 <Barcode handleAddProduct={handleAddProduct} />
               </header>
-
               <Card x-chunk="dashboard-05-chunk-3">
                 <CardHeader className="px-7">
                   <CardTitle>Orders</CardTitle>
@@ -165,7 +165,11 @@ function Page() {
                 </CardContent>
               </Card>
 
-              <Report chartData={chartData} />
+              {isReportVisible && (
+                <Report chartData={chartData} />
+              )
+
+              }
 
             </div>
 
