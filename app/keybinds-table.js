@@ -26,6 +26,7 @@ function KeybindsTable() {
                       <div >Ctrl + F1</div>
                     </TableCell>
                   </TableRow>
+
                   <TableRow className="bg-accent">
                     <TableCell>
                       <div>Cash Received Entry</div>
@@ -34,6 +35,25 @@ function KeybindsTable() {
                       <div >Ctrl + F2</div>
                     </TableCell>
                   </TableRow>
+
+                  <TableRow className="bg-accent">
+                    <TableCell>
+                      <div>Show report</div>
+                    </TableCell>
+                    <TableCell>
+                      <div >Ctrl + F3</div>
+                    </TableCell>
+                  </TableRow>
+
+                  <TableRow className="bg-accent">
+                    <TableCell>
+                      <div >New Transaction</div>
+                    </TableCell>
+                    <TableCell>
+                      <div >Ctrl + F9</div>
+                    </TableCell>
+                  </TableRow>
+
                   <TableRow className="bg-accent">
                     <TableCell>
                       <div >Switch Theme</div>
@@ -42,6 +62,7 @@ function KeybindsTable() {
                       <div >Ctrl + F12</div>
                     </TableCell>
                   </TableRow>
+
                 </TableBody>
               </Table>
             </div>

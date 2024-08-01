@@ -1,12 +1,12 @@
-"use client"
+"use client";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import {
   Table,
   TableBody,
@@ -14,13 +14,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
-import React, { useState, useEffect } from 'react'
-import { ModeToggle } from "@/components/ui/mode-toggle"
-import Barcode from "./barcode"
-import KeybindsTable from "./keybinds-table"
-import { toast } from "sonner"
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import React, { useState, useEffect } from 'react';
+import { ModeToggle } from "@/components/ui/mode-toggle";
+import Barcode from "./barcode";
+import KeybindsTable from "./keybinds-table";
+import { toast } from "sonner";
+import Report from "./reports";
 
 function Page() {
   const products = [
@@ -36,15 +37,15 @@ function Page() {
     { barcode: "1010", product: "Soy Sauce (500ml)", price: 38 },
   ];
 
+  const [transactionForToday, setTransactionForToday] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [total, setTotal] = useState(0);
   const [isCashInputVisible, setIsCashInputVisible] = useState(false);
   const [isChangeVisible, setIsChangeVisible] = useState(false);
-  const [cashTendered, setCashTendered] = useState(0);
+  const [cashTendered, setCashTendered] = useState("");
   const [customerChange, setCustomerChange] = useState(0);
 
   const handleAddProduct = (newProductSelected) => {
-    console.log(newProductSelected);
     const product = products.find(product => product.barcode === newProductSelected.barcode);
     if (product) {
       setSelectedProducts([...selectedProducts, { product: product.product, quantity: parseInt(newProductSelected.quantity), price: product.price }]);
@@ -53,7 +54,7 @@ function Page() {
     } else {
       toast.error("Product not found");
     }
-  }
+  };
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -64,23 +65,55 @@ function Page() {
           toast.error("No product selected yet");
         }
       } else if (isCashInputVisible && event.key === 'Enter') {
-
-        if (parseInt(cashTendered) >= parseInt(total)) {
+        if (parseInt(cashTendered) >= total) {
           setIsChangeVisible(true);
-          setCashTendered(0);
-          setCustomerChange(cashTendered - total);
+          setCustomerChange(parseInt(cashTendered) - total);
           toast.success("Successfully paid");
         } else {
           toast.error("Insufficient cash");
         }
+      } else if (event.ctrlKey && event.key === 'F9') {
+        if (selectedProducts.length > 0 && total > 0 && cashTendered !== "") {
+          setTransactionForToday([...transactionForToday, { selectedProducts }]);
+        }
+        setIsChangeVisible(false);
+        setIsCashInputVisible(false);
+        setSelectedProducts([]);
+        setTotal(0);
+        setCashTendered("");
+        setCustomerChange(0);
+        toast.success("Transaction reset");
+      } else if (event.key === 'F8') {
+        console.log("transaction for today" + JSON.stringify(transactionForToday));
       }
-    }
+    };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-    }
-  }, [cashTendered, isCashInputVisible, selectedProducts.length, total]);
+    };
+  }, [cashTendered, isCashInputVisible, selectedProducts, total, transactionForToday]);
+  const computeQuantities = () => {
+    const quantityMap = products.reduce((acc, product) => {
+      acc[product.product] = 0;
+      return acc;
+    }, {});
+
+    transactionForToday.forEach(transaction => {
+      transaction.selectedProducts.forEach(product => {
+        if (quantityMap[product.product] !== undefined) {
+          quantityMap[product.product] += product.quantity;
+        }
+      });
+    });
+
+    return Object.keys(quantityMap).map(product => ({
+      product,
+      quantity: quantityMap[product]
+    }));
+  };
+
+  const chartData = computeQuantities();
 
   return (
     <>
@@ -131,6 +164,9 @@ function Page() {
                   </Table>
                 </CardContent>
               </Card>
+
+              <Report chartData={chartData} />
+
             </div>
 
             <div className="mt-2">
@@ -169,7 +205,8 @@ function Page() {
                                   {customerChange}
                                   <span> Php</span>
                                 </span>
-                              </li></>
+                              </li>
+                            </>
                           )}
                         </>
                       )}
@@ -184,7 +221,7 @@ function Page() {
         </div>
       </div>
     </>
-  )
+  );
 }
 
-export default Page
+export default Page;
