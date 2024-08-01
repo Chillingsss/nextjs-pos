@@ -7,12 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 const chartConfig = {
   desktop: {
     label: "Desktop",
-    color: "#2563eb",
+    color: "#5b21b6",
   },
-  mobile: {
-    label: "Mobile",
-    color: "#60a5fa",
-  },
+
 };
 
 export default function Report({ chartData }) {
