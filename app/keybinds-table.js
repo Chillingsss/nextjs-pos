@@ -28,6 +28,14 @@ function KeybindsTable() {
                   </TableRow>
                   <TableRow className="bg-accent">
                     <TableCell>
+                      <div>Cash Received Entry</div>
+                    </TableCell>
+                    <TableCell>
+                      <div >Ctrl + F2</div>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow className="bg-accent">
+                    <TableCell>
                       <div >Switch Theme</div>
                     </TableCell>
                     <TableCell>

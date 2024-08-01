@@ -1,5 +1,4 @@
 "use client"
-import { Badge } from "@/components/ui/badge"
 import {
   Card,
   CardContent,
@@ -16,7 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import React, { useState } from 'react'
+import { Input } from "@/components/ui/input"
+import React, { useState, useEffect } from 'react'
 import { ModeToggle } from "@/components/ui/mode-toggle"
 import Barcode from "./barcode"
 import KeybindsTable from "./keybinds-table"
@@ -36,32 +36,62 @@ function Page() {
     { barcode: "1010", product: "Soy Sauce (500ml)", price: 38 },
   ];
 
-  const [selectedProducts, setSelectedProducts] = useState([])
+  const [selectedProducts, setSelectedProducts] = useState([]);
   const [total, setTotal] = useState(0);
+  const [isCashInputVisible, setIsCashInputVisible] = useState(false);
+  const [isChangeVisible, setIsChangeVisible] = useState(false);
+  const [cashTendered, setCashTendered] = useState(0);
+  const [customerChange, setCustomerChange] = useState(0);
 
   const handleAddProduct = (newProductSelected) => {
-    console.log(newProductSelected)
+    console.log(newProductSelected);
     const product = products.find(product => product.barcode === newProductSelected.barcode);
-    if (product){
-      setSelectedProducts([...selectedProducts, {product: product.product, quantity: parseInt(newProductSelected.quantity), price: product.price}])
-      setTotal(total + product.price * parseInt(newProductSelected.quantity))
-    }else{
+    if (product) {
+      setSelectedProducts([...selectedProducts, { product: product.product, quantity: parseInt(newProductSelected.quantity), price: product.price }]);
+      setTotal(total + product.price * parseInt(newProductSelected.quantity));
+      toast.success("Product added");
+    } else {
       toast.error("Product not found");
     }
-    
   }
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.ctrlKey && event.key === 'F2') {
+        if (selectedProducts.length > 0) {
+          setIsCashInputVisible(!isCashInputVisible);
+        } else {
+          toast.error("No product selected yet");
+        }
+      } else if (isCashInputVisible && event.key === 'Enter') {
+
+        if (parseInt(cashTendered) >= parseInt(total)) {
+          setIsChangeVisible(true);
+          setCashTendered(0);
+          setCustomerChange(cashTendered - total);
+          toast.success("Successfully paid");
+        } else {
+          toast.error("Insufficient cash");
+        }
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [cashTendered, isCashInputVisible, selectedProducts.length, total]);
 
   return (
     <>
-
       <div className="flex min-h-screen w-full flex-col bg-muted/40">
         <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
           <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
-            
+
             <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
               <header>
                 <ModeToggle />
-                <Barcode handleAddProduct={handleAddProduct}/>
+                <Barcode handleAddProduct={handleAddProduct} />
               </header>
 
               <Card x-chunk="dashboard-05-chunk-3">
@@ -97,12 +127,6 @@ function Page() {
                           <TableCell className="text-right">{product.price * product.quantity} <span>Php</span></TableCell>
                         </TableRow>
                       ))}
-                      {/* <TableRow className="bg-accent">
-                        <TableCell className="hidden sm:table-cell">Sale</TableCell>
-                        <TableCell className="hidden sm:table-cell">1</TableCell>
-                        <TableCell className="hidden md:table-cell">2023-06-23</TableCell>
-                        <TableCell className="text-right">$250.00</TableCell>
-                      </TableRow> */}
                     </TableBody>
                   </Table>
                 </CardContent>
@@ -120,6 +144,35 @@ function Page() {
                         <span className="text-muted-foreground text-xl">Total</span>
                         <span className="text-muted-foreground text-xl">{total} <span>Php</span></span>
                       </li>
+                      {isCashInputVisible && (
+                        <>
+                          <li className="flex items-center justify-between font-semibold">
+                            <span className="text-muted-foreground text-xl">Customer Cash Tendered</span>
+                            <span className="text-muted-foreground text-xl">
+                              <Input
+                                type="text"
+                                placeholder="Enter cash tendered"
+                                value={cashTendered}
+                                onChange={(e) => setCashTendered(e.target.value)}
+                                className="w-full border p-1"
+                                autoFocus
+                              />
+                            </span>
+                          </li>
+                          {isChangeVisible && (
+                            <>
+                              <Separator className="my-2" />
+
+                              <li className="flex items-center justify-between font-semibold">
+                                <span className="text-muted-foreground text-xl">Change</span>
+                                <span className="text-muted-foreground text-xl">
+                                  {customerChange}
+                                  <span> Php</span>
+                                </span>
+                              </li></>
+                          )}
+                        </>
+                      )}
                     </ul>
                   </div>
                 </CardContent>
@@ -135,4 +188,3 @@ function Page() {
 }
 
 export default Page
-
