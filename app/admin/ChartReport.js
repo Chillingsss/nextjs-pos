@@ -1,30 +1,59 @@
-import { CardDescription } from '@/components/ui/card'
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
-import React, { useState } from 'react'
-import { Area, AreaChart, XAxis, YAxis } from 'recharts'
+import { CardDescription } from '@/components/ui/card';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { Area, AreaChart, XAxis, YAxis, Tooltip } from 'recharts';
+import { toast } from 'sonner';
+
+function formatDates(dateString) {
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  return new Date(dateString).toLocaleDateString(undefined, options);
+}
+
+function formatShortDate(dateString) {
+  const options = { month: 'short', day: 'numeric' };
+  return new Date(dateString).toLocaleDateString(undefined, options);
+}
 
 function ChartReport() {
   const [data, setData] = useState([]);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const getTotalAmount = () => {
+  const getTotalAmountForCurrentMonth = async () => {
+    setIsLoading(true);
     try {
-      
+      const url = "http://localhost/pos_backend/api/sales.php";
+      const formData = new FormData();
+      formData.append("operation", "getTotalAmountForCurrentMonth");
+      const res = await axios.post(url, formData);
+      const fetchedData = res.data;
+
+      const totalAmountThisMonth = fetchedData.reduce((acc, curr) => acc + parseFloat(curr.totalAmount), 0);
+      setData(fetchedData);
+      setTotalAmount(totalAmountThisMonth);
+
+      console.log("ChartReport.js => getTotalAmountForCurrentMonth() res: ", res);
     } catch (error) {
-
+      toast.error("Something went wrong");
+      console.log("ChartReport.js => getTotalAmountForCurrentMonth() error: ", error);
     } finally {
-
+      setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    getTotalAmountForCurrentMonth();
+  }, []);
 
   return (
     <>
       <div>
-
         <CardDescription>{"This month's total sales"}</CardDescription>
       </div>
       <div>
-        <div className="flex items-baseline gap-1 text-4xl tabular-nums">
-          1000
+        <div className="flex items-baseline gap-1 text-4xl tabular-nums mb-5">
+          {totalAmount}
           <span className="font-sans text-sm font-normal tracking-normal text-muted-foreground">
             Php
           </span>
@@ -38,65 +67,9 @@ function ChartReport() {
           }}
         >
           <AreaChart
-            accessibilityLayer
-            data={[
-              {
-                date: "2024-01-01",
-                time: 8.5,
-              },
-              {
-                date: "2024-01-02",
-                time: 7.2,
-              },
-              {
-                date: "2024-01-03",
-                time: 8.1,
-              },
-              {
-                date: "2024-01-04",
-                time: 6.2,
-              },
-              {
-                date: "2024-01-05",
-                time: 5.2,
-              },
-              {
-                date: "2024-01-06",
-                time: 8.1,
-              },
-              {
-                date: "2024-01-07",
-                time: 7.0,
-              },
-              {
-                date: "2024-01-08",
-                time: 8.5,
-              },
-              {
-                date: "2024-01-09",
-                time: 7.2,
-              },
-              {
-                date: "2024-01-10",
-                time: 8.1,
-              },
-              {
-                date: "2024-01-11",
-                time: 6.2,
-              },
-              {
-                date: "2024-01-12",
-                time: 5.2,
-              },
-              {
-                date: "2024-01-13",
-                time: 8.1,
-              },
-              {
-                date: "2024-01-14",
-                time: 7.0,
-              },
-            ]}
+            width={730}
+            height={250}
+            data={data}
             margin={{
               left: 0,
               right: 0,
@@ -104,10 +77,24 @@ function ChartReport() {
               bottom: 0,
             }}
           >
-            <XAxis dataKey="date" hide />
-            <YAxis domain={["dataMin - 5", "dataMax + 2"]} hide />
+            <XAxis dataKey="date" tickFormatter={formatShortDate} />
+            <YAxis />
+            <Tooltip
+              content={<ChartTooltipContent hideLabel />}
+              formatter={(value, name, props) => (
+                <div className="flex flex-col items-start text-xs text-muted-foreground">
+                  <span>{formatDates(props.payload.date)}</span>
+                  <div className="flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
+                    {value}
+                    <span className="font-normal text-muted-foreground">
+                      php
+                    </span>
+                  </div>
+                </div>
+              )}
+            />
             <defs>
-              <linearGradient id="fillTime" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="fillTotalAmount" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
                   stopColor="var(--color-time)"
@@ -121,32 +108,17 @@ function ChartReport() {
               </linearGradient>
             </defs>
             <Area
-              dataKey="time"
-              type="natural"
-              fill="url(#fillTime)"
+              dataKey="totalAmount"
+              type="monotone"
+              fill="url(#fillTotalAmount)"
               fillOpacity={0.4}
               stroke="var(--color-time)"
-            />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-              formatter={(value) => (
-                <div className="flex min-w-[120px] items-center text-xs text-muted-foreground">
-                  Dec 1 2023
-                  <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
-                    {value}
-                    <span className="font-normal text-muted-foreground">
-                      php
-                    </span>
-                  </div>
-                </div>
-              )}
             />
           </AreaChart>
         </ChartContainer>
       </div>
     </>
-  )
+  );
 }
 
-export default ChartReport
+export default ChartReport;
