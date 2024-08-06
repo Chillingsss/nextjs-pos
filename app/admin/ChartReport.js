@@ -1,4 +1,4 @@
-import { CardDescription } from '@/components/ui/card';
+import { CardDescription, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { Progress } from '@/components/ui/progress';
 import axios from 'axios';
@@ -63,15 +63,18 @@ function ChartReport() {
         <CardDescription>{"Getting data..."}</CardDescription>
       </div> :
         <>
+
           <div>
-            <CardDescription>{"This month's total sales"}</CardDescription>
-          </div>
-          <div>
-            <div className="flex items-baseline gap-1 text-4xl tabular-nums mb-5">
-              {totalAmount}
-              <span className="font-sans text-sm font-normal tracking-normal text-muted-foreground">
-                Php
-              </span>
+            <div className='px-2'>
+              <div>
+                <CardDescription>{"This month's total sales"}</CardDescription>
+              </div>
+              <div className="flex items-baseline gap-1 text-4xl tabular-nums mb-5">
+                {totalAmount}
+                <span className="font-sans text-sm font-normal tracking-normal text-muted-foreground">
+                  Php
+                </span>
+              </div>
             </div>
             <ChartContainer
               config={{
@@ -102,7 +105,7 @@ function ChartReport() {
                       <div className="flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
                         {value}
                         <span className="font-normal text-muted-foreground">
-                          php
+                          Php
                         </span>
                       </div>
                     </div>

@@ -80,9 +80,10 @@ export default function AdminDashboard() {
   const [zReports, setZReports] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState(today);
+  const [progress, setProgress] = useState(33);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; 
+  const itemsPerPage = 10;
 
   const getZReports = useCallback(async () => {
     setIsLoading(true);
@@ -95,11 +96,17 @@ export default function AdminDashboard() {
 
       const res = await axios.post(url, formData);
       setZReports(res.data);
+      setProgress(78);
     } catch (error) {
       toast.error("Something went wrong");
       console.log("AdminDashboard.js => getZReports() error: ", error);
     } finally {
-      setIsLoading(false);
+      setTimeout(() => {
+        setProgress(100);
+      }, 500)
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000)
     }
   }, [selectedDate]);
 
@@ -117,7 +124,7 @@ export default function AdminDashboard() {
       setCurrentPage(page);
     }
   };
-  
+
 
   function formatTime(inputDate) {
     const date = new Date(inputDate);
@@ -191,16 +198,22 @@ export default function AdminDashboard() {
                 </CardFooter>
               </Card>
             </div>
-            <Tabs defaultValue="week">
-              <TabsContent value="week">
-                <Card>
-                  <CardHeader className="px-7">
-                    <CardTitle>Orders</CardTitle>
-                    <CardDescription>
-                      Recent orders from your store.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
+
+            <Card>
+              <CardHeader className="px-7">
+                <CardTitle>Orders</CardTitle>
+                <CardDescription>
+                  Recent orders from your store.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="flex flex-col items-center w-100">
+                    <Progress value={progress} className="w-[80%] mb-3" />
+                    <CardDescription>{"Getting data..."}</CardDescription>
+                  </div>
+                ) : (
+                  <>
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -257,17 +270,20 @@ export default function AdminDashboard() {
                         </PaginationContent>
                       </Pagination>
                     </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
 
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
           </div>
           <div>
             <Card className="overflow-hidden">
               <CardHeader className="flex flex-row items-start bg-muted/50">
                 <div className="grid gap-0.5">
 
+                  <CardTitle className="text-xl">
+                    Product Sold
+                  </CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="p-3 text-sm">
