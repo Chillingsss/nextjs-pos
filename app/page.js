@@ -22,103 +22,105 @@ import Barcode from "./barcode";
 import KeybindsTable from "./keybinds-table";
 import { toast } from "sonner";
 import Report from "./reports";
+import AdminDashboard from "./admin/AdminDashboard";
 
 function Page() {
-  const products = [
-    { barcode: "1001", product: "Instant Noodles", price: 55 },
-    { barcode: "1002", product: "Canned Tuna", price: 72 },
-    { barcode: "1003", product: "Rice (1kg)", price: 45 },
-    { barcode: "1004", product: "Milk (1L)", price: 60 },
-    { barcode: "1005", product: "Eggs (12 pcs)", price: 95 },
-    { barcode: "1006", product: "Bread (Loaf)", price: 40 },
-    { barcode: "1007", product: "Cooking Oil (500ml)", price: 85 },
-    { barcode: "1008", product: "Sugar (1kg)", price: 50 },
-    { barcode: "1009", product: "Coffee (200g)", price: 150 },
-    { barcode: "1010", product: "Soy Sauce (500ml)", price: 38 },
-  ];
+  // const products = [
+  //   { barcode: "1001", product: "Instant Noodles", price: 55 },
+  //   { barcode: "1002", product: "Canned Tuna", price: 72 },
+  //   { barcode: "1003", product: "Rice (1kg)", price: 45 },
+  //   { barcode: "1004", product: "Milk (1L)", price: 60 },
+  //   { barcode: "1005", product: "Eggs (12 pcs)", price: 95 },
+  //   { barcode: "1006", product: "Bread (Loaf)", price: 40 },
+  //   { barcode: "1007", product: "Cooking Oil (500ml)", price: 85 },
+  //   { barcode: "1008", product: "Sugar (1kg)", price: 50 },
+  //   { barcode: "1009", product: "Coffee (200g)", price: 150 },
+  //   { barcode: "1010", product: "Soy Sauce (500ml)", price: 38 },
+  // ];
 
-  const [transactionForToday, setTransactionForToday] = useState([]);
-  const [selectedProducts, setSelectedProducts] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [isCashInputVisible, setIsCashInputVisible] = useState(false);
-  const [isChangeVisible, setIsChangeVisible] = useState(false);
-  const [cashTendered, setCashTendered] = useState("");
-  const [customerChange, setCustomerChange] = useState(0);
-  const [isReportVisible, setIsReportVisible] = useState(false);
+  // const [transactionForToday, setTransactionForToday] = useState([]);
+  // const [selectedProducts, setSelectedProducts] = useState([]);
+  // const [total, setTotal] = useState(0);
+  // const [isCashInputVisible, setIsCashInputVisible] = useState(false);
+  // const [isChangeVisible, setIsChangeVisible] = useState(false);
+  // const [cashTendered, setCashTendered] = useState("");
+  // const [customerChange, setCustomerChange] = useState(0);
+  // const [isReportVisible, setIsReportVisible] = useState(false);
 
-  const handleAddProduct = (newProductSelected) => {
-    const product = products.find(product => product.barcode === newProductSelected.barcode);
-    if (product) {
-      setSelectedProducts([...selectedProducts, { product: product.product, quantity: parseInt(newProductSelected.quantity), price: product.price }]);
-      setTotal(total + product.price * parseInt(newProductSelected.quantity));
-      toast.success("Product added");
-    } else {
-      toast.error("Product not found");
-    }
-  };
+  // const handleAddProduct = (newProductSelected) => {
+  //   const product = products.find(product => product.barcode === newProductSelected.barcode);
+  //   if (product) {
+  //     setSelectedProducts([...selectedProducts, { product: product.product, quantity: parseInt(newProductSelected.quantity), price: product.price }]);
+  //     setTotal(total + product.price * parseInt(newProductSelected.quantity));
+  //     toast.success("Product added");
+  //   } else {
+  //     toast.error("Product not found");
+  //   }
+  // };
 
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.ctrlKey && event.key === 'F2') {
-        if (selectedProducts.length > 0) {
-          setIsCashInputVisible(!isCashInputVisible);
-        } else {
-          toast.error("No product selected yet");
-        }
-      } else if (isCashInputVisible && event.key === 'Enter') {
-        if (parseInt(cashTendered) >= total) {
-          setIsChangeVisible(true);
-          setCustomerChange(parseInt(cashTendered) - total);
-          toast.success("Successfully paid");
-        } else {
-          toast.error("Insufficient cash");
-        }
-      } else if (event.ctrlKey && event.key === 'F9') {
-        if (selectedProducts.length > 0 && total > 0 && cashTendered !== "") {
-          setTransactionForToday([...transactionForToday, { selectedProducts }]);
-        }
-        setIsChangeVisible(false);
-        setIsCashInputVisible(false);
-        setSelectedProducts([]);
-        setTotal(0);
-        setCashTendered("");
-        setCustomerChange(0);
-        toast.success("Transaction reset");
-      } else if (event.ctrlKey && event.key === 'F3') {
-        setIsReportVisible(!isReportVisible);
-      }
-    };
+  // useEffect(() => {
+  //   const handleKeyDown = (event) => {
+  //     if (event.ctrlKey && event.key === 'F2') {
+  //       if (selectedProducts.length > 0) {
+  //         setIsCashInputVisible(!isCashInputVisible);
+  //       } else {
+  //         toast.error("No product selected yet");
+  //       }
+  //     } else if (isCashInputVisible && event.key === 'Enter') {
+  //       if (parseInt(cashTendered) >= total) {
+  //         setIsChangeVisible(true);
+  //         setCustomerChange(parseInt(cashTendered) - total);
+  //         toast.success("Successfully paid");
+  //       } else {
+  //         toast.error("Insufficient cash");
+  //       }
+  //     } else if (event.ctrlKey && event.key === 'F9') {
+  //       if (selectedProducts.length > 0 && total > 0 && cashTendered !== "") {
+  //         setTransactionForToday([...transactionForToday, { selectedProducts }]);
+  //       }
+  //       setIsChangeVisible(false);
+  //       setIsCashInputVisible(false);
+  //       setSelectedProducts([]);
+  //       setTotal(0);
+  //       setCashTendered("");
+  //       setCustomerChange(0);
+  //       toast.success("Transaction reset");
+  //     } else if (event.ctrlKey && event.key === 'F3') {
+  //       setIsReportVisible(!isReportVisible);
+  //     }
+  //   };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [cashTendered, isCashInputVisible, isReportVisible, selectedProducts, total, transactionForToday]);
-  const computeQuantities = () => {
-    const quantityMap = products.reduce((acc, product) => {
-      acc[product.product] = 0;
-      return acc;
-    }, {});
+  //   window.addEventListener("keydown", handleKeyDown);
+  //   return () => {
+  //     window.removeEventListener("keydown", handleKeyDown);
+  //   };
+  // }, [cashTendered, isCashInputVisible, isReportVisible, selectedProducts, total, transactionForToday]);
+  // const computeQuantities = () => {
+  //   const quantityMap = products.reduce((acc, product) => {
+  //     acc[product.product] = 0;
+  //     return acc;
+  //   }, {});
 
-    transactionForToday.forEach(transaction => {
-      transaction.selectedProducts.forEach(product => {
-        if (quantityMap[product.product] !== undefined) {
-          quantityMap[product.product] += product.quantity;
-        }
-      });
-    });
+  //   transactionForToday.forEach(transaction => {
+  //     transaction.selectedProducts.forEach(product => {
+  //       if (quantityMap[product.product] !== undefined) {
+  //         quantityMap[product.product] += product.quantity;
+  //       }
+  //     });
+  //   });
 
-    return Object.keys(quantityMap).map(product => ({
-      product,
-      quantity: quantityMap[product]
-    }));
-  };
+  //   return Object.keys(quantityMap).map(product => ({
+  //     product,
+  //     quantity: quantityMap[product]
+  //   }));
+  // };
 
-  const chartData = computeQuantities();
+  // const chartData = computeQuantities();
 
   return (
     <>
-      <div className="flex min-h-screen w-full flex-col bg-muted/40">
+      <AdminDashboard />
+      {/* <div className="flex min-h-screen w-full flex-col bg-muted/40">
         <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
           <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
 
@@ -223,7 +225,7 @@ function Page() {
             </div>
           </main>
         </div>
-      </div>
+      </div> */}
     </>
   );
 }
