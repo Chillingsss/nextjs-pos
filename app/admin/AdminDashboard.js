@@ -148,10 +148,9 @@ export default function AdminDashboard({ className }) {
               <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
                 <Card className="sm:col-span-2">
                   <CardHeader className="pb-3">
-                    <CardTitle>Your Orders</CardTitle>
+                    <CardTitle>Add Product</CardTitle>
                     <CardDescription className="max-w-lg text-balance leading-relaxed">
-                      Introducing Our Dynamic Orders Dashboard for Seamless
-                      Management and Insightful Analysis.
+                      Add new product
                     </CardDescription>
                   </CardHeader>
                   <CardFooter>

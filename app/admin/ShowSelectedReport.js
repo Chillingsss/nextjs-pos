@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { Dialog, DialogFooter, DialogHeader, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogHeader, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { formatDates, formatTime } from './AdminDashboard';
@@ -11,6 +11,7 @@ function ShowSelectedReport({ report, show, hide }) {
   const [items, setItems] = useState([]);
   useEffect(() => {
     if (show && report) {
+      console.log("REPORTREPORTREPORTREPORT: ", report);
       setItems(report.items);
     }
   }, [show, report]);
