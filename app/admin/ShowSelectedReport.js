@@ -22,9 +22,9 @@ function ShowSelectedReport({ report, show, hide }) {
     <Dialog open={show} onOpenChange={hide}>
       <DialogContent className="max-w-[800px] max-h-[600px] overflow-auto mx-auto">
         <DialogHeader>
-          <DialogTitle>Report Details</DialogTitle>
+          <DialogTitle>Transaction Details</DialogTitle>
           <DialogDescription>
-            View the details of the selected report here.
+            View the details of the selected transaction here.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
