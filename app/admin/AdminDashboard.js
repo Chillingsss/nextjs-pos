@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import ShowSelectedReport from "./ShowSelectedReport";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ShowSelectedProduct from "./ShowSelectedProduct";
+import CashierTab from "./CashierTab";
 
 export default function AdminDashboard({ className }) {
   const today = new Date().toISOString().split('T')[0];
@@ -51,9 +52,11 @@ export default function AdminDashboard({ className }) {
     setShowSelectedProduct(true);
   };
 
-  const closeShowSelectedProduct = () => {
+  const closeShowSelectedProduct = (returnedValue) => {
     setShowSelectedProduct(false);
-    getAllProduct();
+    if (returnedValue === true) {
+      getAllProduct();
+    }
   }
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -192,7 +195,7 @@ export default function AdminDashboard({ className }) {
                       <TabsList>
                         <TabsTrigger value="orders">Recent Orders</TabsTrigger>
                         <TabsTrigger value="products">Products</TabsTrigger>
-                        <TabsTrigger value="year">Year</TabsTrigger>
+                        <TabsTrigger value="cashiers">Cashiers</TabsTrigger>
                       </TabsList>
                     </div>
                     <TabsContent value="orders">
@@ -345,11 +348,11 @@ export default function AdminDashboard({ className }) {
                                     <div className="font-medium">{product.prod_id}</div>
                                   </TableCell>
                                   <TableCell className="table-cell text-center">
-                                   {product.prod_name}
+                                    {product.prod_name}
                                   </TableCell>
                                   <TableCell className="text-right">
                                     {product.prod_price}<span> Php</span>
-                                  </TableCell> 
+                                  </TableCell>
                                 </TableRow>
                               )) : (
                                 <TableRow>
@@ -362,6 +365,9 @@ export default function AdminDashboard({ className }) {
                           </Table>
                         </>
                       )}
+                    </TabsContent>
+                    <TabsContent value="cashiers">
+                      <CashierTab />
                     </TabsContent>
                   </Tabs>
                 </CardContent>

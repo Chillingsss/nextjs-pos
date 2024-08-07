@@ -38,7 +38,7 @@ function ShowSelectedProduct({ report, show, hide }) {
       console.error('Error updating product:', error);
     } finally {
       setIsLoading(false);
-      hide();
+      hide(true);
     }
   };
 
@@ -74,7 +74,7 @@ function ShowSelectedProduct({ report, show, hide }) {
           </div>
         </div>
         <DialogFooter>
-          <Button variant="secondary" onClick={hide}>Close</Button>
+          <Button variant="secondary" onClick={() => hide(false)}>Close</Button>
           <Button onClick={handleUpdateProduct} disabled={isLoading}>{isLoading ? 'Updating...' : 'Update'}</Button>
         </DialogFooter>
       </DialogContent>

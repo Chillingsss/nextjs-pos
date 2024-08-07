@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { Dialog, DialogFooter, DialogHeader, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { formatDates, formatTime } from './AdminDashboard';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
@@ -12,8 +11,7 @@ function ShowSelectedReport({ report, show, hide }) {
   const [items, setItems] = useState([]);
   useEffect(() => {
     if (show && report) {
-      setItems(report.items); // Ensure `items` is directly set from `report.items`
-      console.log('Selected Report:', report);
+      setItems(report.items);
     }
   }, [show, report]);
 
