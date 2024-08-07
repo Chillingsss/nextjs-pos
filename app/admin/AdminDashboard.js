@@ -18,6 +18,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { format, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import ShowSelectedReport from "./ShowSelectedReport";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ShowSelectedProduct from "./ShowSelectedProduct";
 
 export default function AdminDashboard({ className }) {
   const today = new Date().toISOString().split('T')[0];
@@ -27,9 +29,14 @@ export default function AdminDashboard({ className }) {
   });
   const [zReports, setZReports] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [allProducts, setAllProducts] = useState([]);
   const [progress, setProgress] = useState(33);
   const [selectedReport, setSelectedReport] = useState(null);
   const [showSelectedReport, setShowSelectedReport] = useState(false);
+
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showSelectedProduct, setShowSelectedProduct] = useState(false);
+
 
   const handleRowClick = (report) => {
     setSelectedReport(report);
@@ -37,6 +44,16 @@ export default function AdminDashboard({ className }) {
   };
   const closeShowSelectedReport = () => {
     setShowSelectedReport(false);
+  }
+
+  const handleProductClick = (report) => {
+    setSelectedProduct(report);
+    setShowSelectedProduct(true);
+  };
+
+  const closeShowSelectedProduct = () => {
+    setShowSelectedProduct(false);
+    getAllProduct();
   }
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -77,8 +94,32 @@ export default function AdminDashboard({ className }) {
     }
   }, [date]);
 
+  const getAllProduct = async () => {
+    setIsLoading(true);
+    try {
+      const url = "http://localhost/pos_backend/api/products.php";
+      const formData = new FormData();
+      formData.append("operation", "getAllProduct");
+      const res = await axios.post(url, formData);
+      console.log("AdminDashboard.js => getAllProduct() res: ", res);
+      setAllProducts(res.data);
+      setProgress(78);
+    } catch (error) {
+      toast.error("Something went wrong");
+      console.log("AdminDashboard.js => getAllProduct() error: ", error);
+    } finally {
+      setTimeout(() => {
+        setProgress(100);
+      }, 500);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
+    }
+  };
+
   useEffect(() => {
     getZReports();
+    getAllProduct();
   }, [getZReports]);
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -145,137 +186,184 @@ export default function AdminDashboard({ className }) {
               </div>
 
               <Card>
-                <CardHeader className="px-7">
-                  <CardTitle>Orders</CardTitle>
-                  <div className="text-balance flex flex-row">
-                    <CardDescription>
-                      Recent orders from your store.
-                    </CardDescription>
-                    <div className="ml-auto">
-                      <div className={cn("grid gap-2", className)}>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              id="date"
-                              variant={"outline"}
-                              className={cn(
-                                "w-[300px] justify-start text-left font-normal",
-                                !date && "text-muted-foreground"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {date?.from ? (
-                                date.to ? (
-                                  <>
-                                    {format(date.from, "LLL dd, y")} -{" "}
-                                    {format(date.to, "LLL dd, y")}
-                                  </>
-                                ) : (
-                                  format(date.from, "LLL dd, y")
-                                )
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              initialFocus
-                              mode="range"
-                              defaultMonth={date?.from}
-                              selected={date}
-                              onSelect={(selectedRange) => {
-                                if (selectedRange && selectedRange.from && selectedRange.to) {
-                                  setDate(selectedRange);
-                                } else if (selectedRange && selectedRange.from) {
-                                  setDate({ from: selectedRange.from, to: selectedRange.from });
-                                } else if (selectedRange && selectedRange.to) {
-                                  setDate({ from: selectedRange.to, to: selectedRange.to });
-                                }
-                              }}
-                              numberOfMonths={2}
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                    </div>
-                  </div>
-                </CardHeader>
                 <CardContent>
-                  {isLoading ? (
-                    <div className="flex flex-col items-center w-100">
-                      <Progress value={progress} className="w-[80%] mb-3" />
-                      <CardDescription>{"Getting data..."}</CardDescription>
+                  <Tabs className="mt-6" defaultValue="orders">
+                    <div className="flex items-center mb-5">
+                      <TabsList>
+                        <TabsTrigger value="orders">Recent Orders</TabsTrigger>
+                        <TabsTrigger value="products">Products</TabsTrigger>
+                        <TabsTrigger value="year">Year</TabsTrigger>
+                      </TabsList>
                     </div>
-                  ) : (
-                    <>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Cashier Name</TableHead>
-                            <TableHead className="hidden sm:table-cell">Date</TableHead>
-                            <TableHead className="hidden md:table-cell">Time</TableHead>
-                            <TableHead className="text-right">Amount</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {currentItems.length > 0 ? currentItems.map((report, index) => (
-                            <TableRow className="bg-accent cursor-pointer" key={index} onClick={() => {handleRowClick(report);}
-                            }>
-                              <TableCell>
-                                <div className="font-medium">{report.user_username}</div>
-                              </TableCell>
-                              <TableCell className="hidden sm:table-cell">
-                                {formatDates(report.sale_date)}
-                              </TableCell>
-                              <TableCell className="hidden md:table-cell">
-                                {formatTime(report.sale_date)}
-                              </TableCell>
-                              <TableCell className="text-right">
-                                {report.sale_totalAmount}<span> Php</span>
-                              </TableCell>
-                            </TableRow>
-                          )) : (
-                            <TableRow>
-                              <TableCell colSpan={4} className="text-center">
-                                No orders found
-                              </TableCell>
-                            </TableRow>
-                          )}
-                        </TableBody>
-                      </Table>
-                      {currentItems.length > 0 && (
-                        <div className="flex justify-center mt-4">
-                          <Pagination>
-                            <PaginationContent>
-                              <PaginationItem
-                                onClick={() => handlePageChange(currentPage - 1)}
-                                disabled={currentPage === 1}
-                              >
-                                <ChevronLeft className="cursor-pointer" />
-                              </PaginationItem>
-                              {Array.from({ length: totalPages }, (_, index) => (
-                                <PaginationItem
-                                  className="cursor-pointer"
-                                  key={index + 1}
-                                  onClick={() => handlePageChange(index + 1)}
-                                  active={currentPage === index + 1}
+                    <TabsContent value="orders">
+                      <div className="flex flex-row">
+                        <div className="ml-auto">
+                          <div className={cn("grid gap-2", className)}>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  id="date"
+                                  variant={"outline"}
+                                  className={cn(
+                                    "w-[300px] justify-start text-left font-normal",
+                                    !date && "text-muted-foreground"
+                                  )}
                                 >
-                                  {index + 1}
-                                </PaginationItem >
-                              ))}
-                              <PaginationItem
-                                onClick={() => handlePageChange(currentPage + 1)}
-                                disabled={currentPage >= totalPages}
-                              >
-                                <ChevronRight className="cursor-pointer" />
-                              </PaginationItem>
-                            </PaginationContent>
-                          </Pagination>
+                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  {date?.from ? (
+                                    date.to ? (
+                                      <>
+                                        {format(date.from, "LLL dd, y")} -{" "}
+                                        {format(date.to, "LLL dd, y")}
+                                      </>
+                                    ) : (
+                                      format(date.from, "LLL dd, y")
+                                    )
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  initialFocus
+                                  mode="range"
+                                  defaultMonth={date?.from}
+                                  selected={date}
+                                  onSelect={(selectedRange) => {
+                                    if (selectedRange && selectedRange.from && selectedRange.to) {
+                                      setDate(selectedRange);
+                                    } else if (selectedRange && selectedRange.from) {
+                                      setDate({ from: selectedRange.from, to: selectedRange.from });
+                                    } else if (selectedRange && selectedRange.to) {
+                                      setDate({ from: selectedRange.to, to: selectedRange.to });
+                                    }
+                                  }}
+                                  numberOfMonths={2}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </div>
                         </div>
+                      </div>
+                      {isLoading ? (
+                        <div className="flex flex-col items-center w-100">
+                          <Progress value={progress} className="w-[80%] mb-3" />
+                          <CardDescription>{"Getting data..."}</CardDescription>
+                        </div>
+                      ) : (
+                        <>
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Cashier Name</TableHead>
+                                <TableHead className="hidden sm:table-cell">Date</TableHead>
+                                <TableHead className="hidden md:table-cell">Time</TableHead>
+                                <TableHead className="text-right">Amount</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {currentItems.length > 0 ? currentItems.map((report, index) => (
+                                <TableRow className="bg-accent cursor-pointer" key={index} onClick={() => { handleRowClick(report); }
+                                }>
+                                  <TableCell>
+                                    <div className="font-medium">{report.user_username}</div>
+                                  </TableCell>
+                                  <TableCell className="hidden sm:table-cell">
+                                    {formatDates(report.sale_date)}
+                                  </TableCell>
+                                  <TableCell className="hidden md:table-cell">
+                                    {formatTime(report.sale_date)}
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    {report.sale_totalAmount}<span> Php</span>
+                                  </TableCell>
+                                </TableRow>
+                              )) : (
+                                <TableRow>
+                                  <TableCell colSpan={4} className="text-center">
+                                    No orders found
+                                  </TableCell>
+                                </TableRow>
+                              )}
+                            </TableBody>
+                          </Table>
+                          {currentItems.length > 0 && (
+                            <div className="flex justify-center mt-4">
+                              <Pagination>
+                                <PaginationContent>
+                                  <PaginationItem
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                  >
+                                    <ChevronLeft className="cursor-pointer" />
+                                  </PaginationItem>
+                                  {Array.from({ length: totalPages }, (_, index) => (
+                                    <PaginationItem
+                                      className="cursor-pointer"
+                                      key={index + 1}
+                                      onClick={() => handlePageChange(index + 1)}
+                                      active={currentPage === index + 1}
+                                    >
+                                      {index + 1}
+                                    </PaginationItem >
+                                  ))}
+                                  <PaginationItem
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage >= totalPages}
+                                  >
+                                    <ChevronRight className="cursor-pointer" />
+                                  </PaginationItem>
+                                </PaginationContent>
+                              </Pagination>
+                            </div>
+                          )}
+                        </>
                       )}
-                    </>
-                  )}
+                    </TabsContent>
+                    <TabsContent value="products">
+                      {isLoading ? (
+                        <div className="flex flex-col items-center w-100">
+                          <Progress value={progress} className="w-[80%] mb-3" />
+                          <CardDescription>{"Getting data..."}</CardDescription>
+                        </div>
+                      ) : (
+                        <>
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Barcode</TableHead>
+                                <TableHead className="text-center">Product</TableHead>
+                                <TableHead className="text-right">Price</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {allProducts.length > 0 ? allProducts.map((product, index) => (
+                                <TableRow className="bg-accent cursor-pointer" key={index} onClick={() => { handleProductClick(product); }
+                                }>
+                                  <TableCell>
+                                    <div className="font-medium">{product.prod_id}</div>
+                                  </TableCell>
+                                  <TableCell className="table-cell text-center">
+                                   {product.prod_name}
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    {product.prod_price}<span> Php</span>
+                                  </TableCell> 
+                                </TableRow>
+                              )) : (
+                                <TableRow>
+                                  <TableCell colSpan={4} className="text-center">
+                                    No orders found
+                                  </TableCell>
+                                </TableRow>
+                              )}
+                            </TableBody>
+                          </Table>
+                        </>
+                      )}
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
               </Card>
 
@@ -301,6 +389,7 @@ export default function AdminDashboard({ className }) {
         </div>
       </div>
       <ShowSelectedReport report={selectedReport} show={showSelectedReport} hide={closeShowSelectedReport} />
+      <ShowSelectedProduct report={selectedProduct} show={showSelectedProduct} hide={closeShowSelectedProduct} />
     </>
   );
 }
