@@ -25,6 +25,8 @@ import Report from "./reports";
 import AdminDashboard from "./admin/AdminDashboard";
 
 function Page() {
+  localStorage.setItem("isLoggedIn", "true");
+  localStorage.setItem("role", "admin");
   // const products = [
   //   { barcode: "1001", product: "Instant Noodles", price: 55 },
   //   { barcode: "1002", product: "Canned Tuna", price: 72 },

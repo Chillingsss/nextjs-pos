@@ -25,8 +25,12 @@ import AddProduct from "./AddProduct";
 import UpdateBegginingBalance from "./UpdateBegginingBalance";
 import Link from "next/link";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useRouter } from "next/navigation";
 
 export default function AdminDashboard({ className }) {
+
+  const router = useRouter();
+
   const today = new Date().toISOString().split('T')[0];
   const [date, setDate] = useState({
     from: parseISO(today),
@@ -137,6 +141,12 @@ export default function AdminDashboard({ className }) {
     }
   };
 
+  const handleLogout = () => {
+    router.push("/");
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("role");
+  }
+
   const getBegginingBalance = async () => {
     try {
       const url = localStorage.getItem("url") + "users.php";
@@ -183,13 +193,16 @@ export default function AdminDashboard({ className }) {
   }
 
   useEffect(() => {
+    if (localStorage.getItem("url") !== "http://localhost/pos_backend/api/") {
+      localStorage.setItem("url", "http://localhost/pos_backend/api/");
+    }
+    if (localStorage.getItem("isLoggedIn") !== "true" || localStorage.getItem("role") !== "admin") {
+      router.push("/");
+    }
     getZReports();
     getAllProduct();
     getBegginingBalance();
     getThisMonthSales();
-    if (localStorage.getItem("url") !== "http://localhost/pos_backend/api/") {
-      localStorage.setItem("url", "http://localhost/pos_backend/api/");
-    }
   }, [getZReports]);
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -215,16 +228,10 @@ export default function AdminDashboard({ className }) {
               <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Link
-                      href="#"
-                      className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                    >
-                   <LogOut className="h-4 w-4" />
-                    </Link>
+                    <LogOut className="h-4 w-4 scale-x-[-1] cursor-pointer" onClick={handleLogout} />
                   </TooltipTrigger>
-                  <TooltipContent side="right">LogOut</TooltipContent>
+                  <TooltipContent side="right">Log Out</TooltipContent>
                 </Tooltip>
-                
               </nav>
             </TooltipProvider>
           </aside>
