@@ -47,7 +47,8 @@ function ShowSelectedCashier({ report, show, hide }) {
 
     setIsLoading(true);
     try {
-      const url = 'http://localhost/pos_backend/api/sales.php';
+      // const url = 'http://localhost/pos_backend/api/sales.php';
+      const url = localStorage.getItem("url") + "sales.php";
       const formatDateForSQL = (inputDate) => {
         return format(new Date(inputDate), 'yyyy-MM-dd');
       };

@@ -16,7 +16,7 @@ function ShowSelectedProduct({ report, show, hide }) {
   const handleUpdateProduct = async () => {
     setIsLoading(true);
     try {
-      const url = 'http://localhost/pos_backend/api/products.php';
+      const url = localStorage.getItem("url") + "products.php";
       const formData = new FormData();
       const name = document.getElementById('name').value;
       const price = document.getElementById('price').value;

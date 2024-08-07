@@ -18,7 +18,7 @@ function CashierTab() {
   const getAllCashiers = async () => {
     setIsLoading(true);
     try {
-      const url = "http://localhost/pos_backend/api/users.php";
+      const url = localStorage.getItem("url") + "users.php";
       const formData = new FormData();
       formData.append("operation", "getAllCashiers");
       const response = await axios.post(url, formData);

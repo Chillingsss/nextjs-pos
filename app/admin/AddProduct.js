@@ -14,7 +14,7 @@ function AddProduct({ refreshData }) {
   const handleAddProduct = async () => {
     setIsLoading(true);
     try {
-      const url = 'http://localhost/pos_backend/api/products.php';
+      const url = localStorage.getItem("url") + 'products.php';
       const formData = new FormData();
       const barcode = document.getElementById('barcode').value;
       const name = document.getElementById('name').value;

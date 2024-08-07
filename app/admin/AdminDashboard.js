@@ -40,6 +40,19 @@ export default function AdminDashboard({ className }) {
 
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showSelectedProduct, setShowSelectedProduct] = useState(false);
+  const [thisMonthSales, setThisMonthSales] = useState(0);
+  const [lastMonthSales, setLastMonthSales] = useState(0);
+
+  const calculatePercentageSales = () => {
+    if (lastMonthSales === 0) {
+      return 0;
+    }
+    const percentage = ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100;
+    return percentage;
+  };
+
+  const percentageChange = calculatePercentageSales();
+  const progressValue = Math.min(Math.abs(percentageChange), 100);
 
 
   const handleRowClick = (report) => {
@@ -68,8 +81,7 @@ export default function AdminDashboard({ className }) {
   const getZReports = useCallback(async () => {
     setIsLoading(true);
     try {
-      const url = "http://localhost/pos_backend/api/sales.php";
-
+      const url = localStorage.getItem("url") + "sales.php";
       const formatDateForSQL = (inputDate) => {
         return format(new Date(inputDate), 'yyyy-MM-dd');
       };
@@ -103,7 +115,7 @@ export default function AdminDashboard({ className }) {
   const getAllProduct = async () => {
     setIsLoading(true);
     try {
-      const url = "http://localhost/pos_backend/api/products.php";
+      const url = localStorage.getItem("url") + "products.php";
       const formData = new FormData();
       formData.append("operation", "getAllProduct");
       const res = await axios.post(url, formData);
@@ -125,7 +137,7 @@ export default function AdminDashboard({ className }) {
 
   const getBegginingBalance = async () => {
     try {
-      const url = "http://localhost/pos_backend/api/users.php";
+      const url = localStorage.getItem("url") + "users.php";
       const formData = new FormData();
       formData.append("operation", "getBeginningBalance");
       const res = await axios.post(url, formData);
@@ -139,10 +151,43 @@ export default function AdminDashboard({ className }) {
 
   }
 
+  const getThisMonthSales = async () => {
+    try {
+      const url = localStorage.getItem("url") + "sales.php";
+      const formData = new FormData();
+      formData.append("operation", "getThisMonthSales");
+      const res = await axios.post(url, formData);
+      console.log("AdminDashboard.js => getThisMonthSales() res: ", res.data[0].totalAmount);
+      setThisMonthSales(res.data[0].totalAmount);
+      getLastMonthSales();
+    } catch (error) {
+      toast.error("Something went wrong");
+      console.log("AdminDashboard.js => getThisMonthSales() error: ", error);
+    }
+  }
+
+  const getLastMonthSales = async () => {
+    try {
+      const url = localStorage.getItem("url") + "sales.php";
+      const formData = new FormData();
+      formData.append("operation", "getLastMonthSales");
+      const res = await axios.post(url, formData);
+      console.log("AdminDashboard.js => getLastMonthSales() res: ", res);
+      setLastMonthSales(res.data[0].totalAmount);
+    } catch (error) {
+      toast.error("Something went wrong");
+      console.log("AdminDashboard.js => getLastMonthSales() error: ", error);
+    }
+  }
+
   useEffect(() => {
     getZReports();
     getAllProduct();
     getBegginingBalance();
+    getThisMonthSales();
+    if(localStorage.getItem("url") !== "http://localhost/pos_backend/api/"){
+      localStorage.setItem("url", "http://localhost/pos_backend/api/");
+    }
   }, [getZReports]);
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -187,20 +232,32 @@ export default function AdminDashboard({ className }) {
 
                   </CardFooter>
                 </Card>
+
+
                 <Card>
                   <CardHeader className="pb-2">
                     <CardDescription>This Month</CardDescription>
-                    <CardTitle className="text-4xl">$5,329</CardTitle>
+                    <CardTitle className="text-4xl">{thisMonthSales + " Php"}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-xs text-muted-foreground">
-                      +10% from last month
+                      {percentageChange >= 0 ? (
+                        <span className="text-green-500">
+                          +{percentageChange.toFixed(2)}% from last month
+                        </span>
+                      ) : (
+                        <span className="text-red-500">
+                          {percentageChange.toFixed(2)}% from last month
+                        </span>
+                      )}
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Progress value={12} aria-label="12% increase" />
+                    <Progress value={progressValue} aria-label={`${Math.abs(percentageChange).toFixed(2)}% change`} />
                   </CardFooter>
                 </Card>
+
+
               </div>
 
               <Card>

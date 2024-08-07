@@ -14,7 +14,7 @@ function UpdateBegginingBalance({ refreshData, balance }) {
   const handleUpdateBegginingBalance = async () => {
     setIsLoading(true);
     try {
-      const url = 'http://localhost/pos_backend/api/users.php';
+      const url = localStorage.getItem("url") + "users.php";
       const formData = new FormData();
       const balance = document.getElementById('balance').value;
       if (!balance) {
