@@ -1,86 +1,34 @@
-import Image from "next/image";
-import Link from "next/link";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Copy,
-  CreditCard,
-  File,
-  Home,
-  LineChart,
-  ListFilter,
-  MoreVertical,
-  Package,
-  Package2,
-  PanelLeft,
-  Search,
-  ShoppingCart,
-  Truck,
-  Users2,
-} from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+import { CalendarIcon, ChevronLeft, ChevronRight, } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-} from "@/components/ui/pagination";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import axios from "axios";
 import BarGraphReport from "./BarGraphReport";
 import ChartReport from "./ChartReport";
+import { Popover, PopoverTrigger } from "@radix-ui/react-popover";
+import { PopoverContent } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { addDays, format, parseISO } from "date-fns";
+import { cn } from "@/lib/utils";
 
-export default function AdminDashboard() {
+export default function AdminDashboard({ className }) {
   const today = new Date().toISOString().split('T')[0];
+  const [date, setDate] = useState({
+    from: parseISO(today),
+    to: addDays(parseISO(today), 1),
+  });
   const [zReports, setZReports] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(today);
+  // const [selectedDate, setSelectedDate] = useState(today);
   const [progress, setProgress] = useState(33);
+
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -89,12 +37,22 @@ export default function AdminDashboard() {
     setIsLoading(true);
     try {
       const url = "http://localhost/pos_backend/api/sales.php";
-      const jsonData = { date: selectedDate };
+
+      const formatDateForSQL = (inputDate) => {
+        return format(new Date(inputDate), 'yyyy-MM-dd');
+      };
+
+      const jsonData = {
+        from: date.from ? formatDateForSQL(date.from) : formatDateForSQL(date.to),
+        to: date.to ? formatDateForSQL(date.to) : formatDateForSQL(date.from),
+      };
+
       const formData = new FormData();
       formData.append("json", JSON.stringify(jsonData));
       formData.append("operation", "getZReportWithSelectedDate");
 
       const res = await axios.post(url, formData);
+      console.log("AdminDashboard.js => getZReports() res: ", res);
       setZReports(res.data);
       setProgress(78);
     } catch (error) {
@@ -103,12 +61,12 @@ export default function AdminDashboard() {
     } finally {
       setTimeout(() => {
         setProgress(100);
-      }, 500)
+      }, 500);
       setTimeout(() => {
         setIsLoading(false);
-      }, 1000)
+      }, 1000);
     }
-  }, [selectedDate]);
+  }, [date]);
 
   useEffect(() => {
     getZReports();
@@ -116,7 +74,8 @@ export default function AdminDashboard() {
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = zReports.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = Array.isArray(zReports) ? zReports.slice(indexOfFirstItem, indexOfLastItem) : [];
+
   const totalPages = Math.ceil(zReports.length / itemsPerPage);
 
   const handlePageChange = (page) => {
@@ -202,9 +161,59 @@ export default function AdminDashboard() {
             <Card>
               <CardHeader className="px-7">
                 <CardTitle>Orders</CardTitle>
-                <CardDescription>
-                  Recent orders from your store.
-                </CardDescription>
+                <div className="text-balance flex flex-row">
+                  <CardDescription>
+                    Recent orders from your store.
+                  </CardDescription>
+                  <div className="ml-auto">
+                    <div className={cn("grid gap-2", className)}>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            id="date"
+                            variant={"outline"}
+                            className={cn(
+                              "w-[300px] justify-start text-left font-normal",
+                              !date && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {date?.from ? (
+                              date.to ? (
+                                <>
+                                  {format(date.from, "LLL dd, y")} -{" "}
+                                  {format(date.to, "LLL dd, y")}
+                                </>
+                              ) : (
+                                format(date.from, "LLL dd, y")
+                              )
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            initialFocus
+                            mode="range"
+                            defaultMonth={date?.from}
+                            selected={date}
+                            onSelect={(selectedRange) => {
+                              if (selectedRange && selectedRange.from && selectedRange.to) {
+                                setDate(selectedRange);
+                              } else if (selectedRange && selectedRange.from) {
+                                setDate({ from: selectedRange.from, to: selectedRange.from });
+                              } else if (selectedRange && selectedRange.to) {
+                                setDate({ from: selectedRange.to, to: selectedRange.to });
+                              }
+                            }}
+                            numberOfMonths={2}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 {isLoading ? (
@@ -224,7 +233,7 @@ export default function AdminDashboard() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {currentItems.map((report, index) => (
+                        {currentItems.length > 0 ? currentItems.map((report, index) => (
                           <TableRow className="bg-accent cursor-pointer" key={index}>
                             <TableCell>
                               <div className="font-medium">{report.user_username}</div>
@@ -239,37 +248,45 @@ export default function AdminDashboard() {
                               {report.sale_totalAmount}<span> Php</span>
                             </TableCell>
                           </TableRow>
-                        ))}
+                        )) : (
+                          <TableRow>
+                            <TableCell colSpan={4} className="text-center">
+                              No orders found
+                            </TableCell>
+                          </TableRow>
+                        )}
                       </TableBody>
                     </Table>
-                    <div className="flex justify-center mt-4">
-                      <Pagination>
-                        <PaginationContent>
-                          <PaginationItem
-                            onClick={() => handlePageChange(currentPage - 1)}
-                            disabled={currentPage === 1}
-                          >
-                            <ChevronLeft className="cursor-pointer" />
-                          </PaginationItem>
-                          {Array.from({ length: totalPages }, (_, index) => (
+                    {currentItems.length > 0 && (
+                      <div className="flex justify-center mt-4">
+                        <Pagination>
+                          <PaginationContent>
                             <PaginationItem
-                              className="cursor-pointer"
-                              key={index + 1}
-                              onClick={() => handlePageChange(index + 1)}
-                              active={currentPage === index + 1}
+                              onClick={() => handlePageChange(currentPage - 1)}
+                              disabled={currentPage === 1}
                             >
-                              {index + 1}
-                            </PaginationItem >
-                          ))}
-                          <PaginationItem
-                            onClick={() => handlePageChange(currentPage + 1)}
-                            disabled={currentPage >= totalPages}
-                          >
-                            <ChevronRight className="cursor-pointer" />
-                          </PaginationItem>
-                        </PaginationContent>
-                      </Pagination>
-                    </div>
+                              <ChevronLeft className="cursor-pointer" />
+                            </PaginationItem>
+                            {Array.from({ length: totalPages }, (_, index) => (
+                              <PaginationItem
+                                className="cursor-pointer"
+                                key={index + 1}
+                                onClick={() => handlePageChange(index + 1)}
+                                active={currentPage === index + 1}
+                              >
+                                {index + 1}
+                              </PaginationItem >
+                            ))}
+                            <PaginationItem
+                              onClick={() => handlePageChange(currentPage + 1)}
+                              disabled={currentPage >= totalPages}
+                            >
+                              <ChevronRight className="cursor-pointer" />
+                            </PaginationItem>
+                          </PaginationContent>
+                        </Pagination>
+                      </div>
+                    )}
                   </>
                 )}
               </CardContent>
@@ -282,7 +299,7 @@ export default function AdminDashboard() {
                 <div className="grid gap-0.5">
 
                   <CardTitle className="text-xl">
-                    Product Sold
+                    Product sold this month
                   </CardTitle>
                 </div>
               </CardHeader>
