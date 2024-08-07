@@ -30,7 +30,7 @@ export default function BarGraphReport() {
   const getBoughtProductsForThisMonth = async () => {
     setIsLoading(true);
     try {
-      const url = "http://localhost/pos_backend/api/sales.php";
+      const url = localStorage.getItem("url") + "sales.php";
       const formData = new FormData();
       formData.append("operation", "getBoughtProductsForThisMonth");
       const res = await axios.post(url, formData);
@@ -75,7 +75,7 @@ export default function BarGraphReport() {
               tickFormatter={(value) => value.slice(0, 6)}
             />
             <ChartTooltip content={<ChartTooltipContent />} />
-            <Bar dataKey="Quantity" fill="var(--color-desktop)" radius={4} />
+            <Bar dataKey="Sold" fill="var(--color-desktop)" radius={4} />
           </BarChart>
         </ChartContainer>}
 
