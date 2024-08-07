@@ -22,6 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ShowSelectedProduct from "./ShowSelectedProduct";
 import CashierTab from "./CashierTab";
 import AddProduct from "./AddProduct";
+import UpdateBegginingBalance from "./UpdateBegginingBalance";
 
 export default function AdminDashboard({ className }) {
   const today = new Date().toISOString().split('T')[0];
@@ -29,6 +30,7 @@ export default function AdminDashboard({ className }) {
     from: parseISO(today),
     to: parseISO(today),
   });
+  const [begginingBalance, setBegginingBalance] = useState(0);
   const [zReports, setZReports] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
@@ -120,10 +122,27 @@ export default function AdminDashboard({ className }) {
       }, 1000);
     }
   };
-  
+
+  const getBegginingBalance = async () => {
+    try {
+      const url = "http://localhost/pos_backend/api/users.php";
+      const formData = new FormData();
+      formData.append("operation", "getBeginningBalance");
+      const res = await axios.post(url, formData);
+      console.log("AdminDashboard.js => getBegginingBalance() res: ", res);
+      setBegginingBalance(res.data.beginning_balance);
+      setProgress(78);
+    } catch (error) {
+      toast.error("Something went wrong");
+      console.log("AdminDashboard.js => getBegginingBalance() error: ", error);
+    }
+
+  }
+
   useEffect(() => {
     getZReports();
     getAllProduct();
+    getBegginingBalance();
   }, [getZReports]);
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -160,16 +179,12 @@ export default function AdminDashboard({ className }) {
                 </Card>
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardDescription>This Week</CardDescription>
-                    <CardTitle className="text-4xl">$1,329</CardTitle>
+                    <CardDescription>Cashier's Beggining Balance</CardDescription>
+                    <CardTitle className="text-4xl">{begginingBalance + " Php"}</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="text-xs text-muted-foreground">
-                      +25% from last week
-                    </div>
-                  </CardContent>
                   <CardFooter>
-                    <Progress value={25} aria-label="25% increase" />
+                    <UpdateBegginingBalance refreshData={getBegginingBalance} balance={begginingBalance} />
+
                   </CardFooter>
                 </Card>
                 <Card>
@@ -193,7 +208,7 @@ export default function AdminDashboard({ className }) {
                   <Tabs className="mt-6" defaultValue="orders">
                     <div className="flex items-center mb-5">
                       <TabsList>
-                        <TabsTrigger value="orders">Recent Orders</TabsTrigger>
+                        <TabsTrigger value="orders">Transactions</TabsTrigger>
                         <TabsTrigger value="products">Products</TabsTrigger>
                         <TabsTrigger value="cashiers">Cashiers</TabsTrigger>
                       </TabsList>
