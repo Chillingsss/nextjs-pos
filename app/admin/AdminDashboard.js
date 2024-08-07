@@ -149,7 +149,7 @@ export default function AdminDashboard({ className }) {
 
   const getBegginingBalance = async () => {
     try {
-      const url = localStorage.getItem("url") + "users.php";
+      const url = localStorage.getItem("url") + "user.php";
       const formData = new FormData();
       formData.append("operation", "getBeginningBalance");
       const res = await axios.post(url, formData);
@@ -193,8 +193,8 @@ export default function AdminDashboard({ className }) {
   }
 
   useEffect(() => {
-    if (localStorage.getItem("url") !== "http://localhost/pos_backend/api/") {
-      localStorage.setItem("url", "http://localhost/pos_backend/api/");
+    if (localStorage.getItem("url") !== "http://localhost/pos/") {
+      localStorage.setItem("url", "http://localhost/pos/");
     }
     if (localStorage.getItem("isLoggedIn") !== "true" || localStorage.getItem("role") !== "admin") {
       router.push("/");

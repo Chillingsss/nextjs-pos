@@ -46,7 +46,7 @@ function AddProduct({ refreshData }) {
       } else if (res.data === 1) {
         toast.success('Product added successfully');
         refreshData();
-        setIsDialogOpen(false); 
+        setIsDialogOpen(false);
         return;
       } else {
         toast.error('Error adding product');

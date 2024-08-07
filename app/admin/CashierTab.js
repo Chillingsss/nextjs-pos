@@ -17,7 +17,7 @@ function CashierTab() {
 
   const getAllCashiers = async () => {
     try {
-      const url = localStorage.getItem("url") + "users.php";
+      const url = localStorage.getItem("url") + "user.php";
       const formData = new FormData();
       formData.append("operation", "getAllCashiers");
       const response = await axios.post(url, formData);
@@ -27,7 +27,7 @@ function CashierTab() {
     } catch (error) {
       toast.error("Something went wrong");
       console.log("CashierTab.js => getAllCashiers() error: ", error);
-    } 
+    }
   };
 
   const handleRowClick = (report) => {

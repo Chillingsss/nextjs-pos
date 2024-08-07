@@ -23,10 +23,16 @@ import KeybindsTable from "./keybinds-table";
 import { toast } from "sonner";
 import Report from "./reports";
 import AdminDashboard from "./admin/AdminDashboard";
+import Login from "./components/login";
 
 function Page() {
-  localStorage.setItem("isLoggedIn", "true");
-  localStorage.setItem("role", "admin");
+
+  useEffect(() => {
+    if (localStorage.getItem("url") !== "http://localhost/pos/") {
+      localStorage.setItem("url", "http://localhost/pos/");
+    }
+  }, []);
+
   // const products = [
   //   { barcode: "1001", product: "Instant Noodles", price: 55 },
   //   { barcode: "1002", product: "Canned Tuna", price: 72 },
@@ -120,7 +126,11 @@ function Page() {
   // const chartData = computeQuantities();
 
   return (
+
+
     <>
+      <Login />
+
       {/* <AdminDashboard /> */}
       {/* <div className="flex min-h-screen w-full flex-col bg-muted/40">
         <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
