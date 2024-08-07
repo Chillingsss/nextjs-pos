@@ -21,6 +21,7 @@ import ShowSelectedReport from "./ShowSelectedReport";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ShowSelectedProduct from "./ShowSelectedProduct";
 import CashierTab from "./CashierTab";
+import AddProduct from "./AddProduct";
 
 export default function AdminDashboard({ className }) {
   const today = new Date().toISOString().split('T')[0];
@@ -119,7 +120,7 @@ export default function AdminDashboard({ className }) {
       }, 1000);
     }
   };
-
+  
   useEffect(() => {
     getZReports();
     getAllProduct();
@@ -149,12 +150,12 @@ export default function AdminDashboard({ className }) {
                 <Card className="sm:col-span-2">
                   <CardHeader className="pb-3">
                     <CardTitle>Add Product</CardTitle>
-                    <CardDescription className="max-w-lg text-balance leading-relaxed">
-                      Add new product
+                    <CardDescription className="max-w-sm text-balance leading-relaxed">
+                      Add new product to the store
                     </CardDescription>
                   </CardHeader>
                   <CardFooter>
-                    <Button>Create New Order</Button>
+                    <AddProduct refreshData={getAllProduct} />
                   </CardFooter>
                 </Card>
                 <Card>

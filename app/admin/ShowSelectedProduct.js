@@ -20,6 +20,10 @@ function ShowSelectedProduct({ report, show, hide }) {
       const formData = new FormData();
       const name = document.getElementById('name').value;
       const price = document.getElementById('price').value;
+      if (!name || !price) {
+        toast.error('Please fill in all fields');
+        return;
+      }
       const jsonData = {
         product_id: report.prod_id,
         productName: name,
@@ -30,7 +34,7 @@ function ShowSelectedProduct({ report, show, hide }) {
       formData.append('json', JSON.stringify(jsonData));
 
       const res = await axios.post(url, formData);
-      if(res.data !== 0){
+      if (res.data !== 0) {
         toast.success('Product updated successfully');
       }
 
