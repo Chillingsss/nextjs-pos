@@ -118,12 +118,14 @@ const TransactionsModal = ({ isVisible, onClose, onLoadTransaction }) => {
 
 
     const handleAdminPasswordChange = async (e) => {
+        const url = localStorage.getItem("url") + "user.php";
+
         const password = e.target.value;
         setAdminPassword(password);
 
         if (password.length > 0) {
             try {
-                const response = await axios.post('http://localhost/pos/user.php', new URLSearchParams({
+                const response = await axios.post(url, new URLSearchParams({
                     operation: 'verifyAdminPassword',
                     json: JSON.stringify({ password: password })
                 }), {

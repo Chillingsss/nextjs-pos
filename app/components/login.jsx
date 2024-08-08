@@ -19,14 +19,17 @@ const Login = () => {
 
         if (storedName && storedRole && storedIsLoggedIn) {
             setIsLoggedIn(true);
-            router.push(storedRole === 'admin' ? '/posAdmin' : '/pos');
+            router.push(storedRole === 'admin' ? '/admin' : '/pos');
         }
     }, [router]);
 
     const handleLogin = async () => {
+
+        const url = localStorage.getItem("url") + "user.php";
+
         if (username && password) {
             try {
-                const response = await axios.post('http://localhost/pos/user.php', new URLSearchParams({
+                const response = await axios.post(url, new URLSearchParams({
                     operation: 'loginUser',
                     json: JSON.stringify({ loginUsername: username, loginPassword: password })
                 }), {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 const ReportsUserModal = ({ isVisible, onClose }) => {
@@ -23,10 +23,12 @@ const ReportsUserModal = ({ isVisible, onClose }) => {
     }, [isVisible, userId]);
 
     const fetchShiftReport = async (userId) => {
+        const url = localStorage.getItem("url") + "sales.php";
+
         try {
             setLoading(true);
 
-            const response = await axios.post('http://localhost/pos/sales.php', new URLSearchParams({
+            const response = await axios.post(url, new URLSearchParams({
                 operation: 'getShiftReport',
                 json: JSON.stringify({ userId })
             }), {
@@ -199,10 +201,40 @@ const ReportsUserModal = ({ isVisible, onClose }) => {
     };
 
 
+    const tableBarcodeContainerRef = useRef(null);
+
+
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.altKey) {
+                if (event.key === 'ArrowUp') {
+
+                    if (tableBarcodeContainerRef.current) {
+                        tableBarcodeContainerRef.current.scrollBy({ top: -100, behavior: 'smooth' });
+                    }
+                    event.preventDefault();
+                } else if (event.key === 'ArrowDown') {
+
+                    if (tableBarcodeContainerRef.current) {
+                        tableBarcodeContainerRef.current.scrollBy({ top: 100, behavior: 'smooth' });
+                    }
+                    event.preventDefault();
+                }
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
+
+
     return (
         isVisible && (
-            <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-75">
-                <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl">
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-75 text-black">
+                <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl text-black">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-2xl font-bold">User Transaction Reports</h2>
                         <button onClick={onClose} className="text-red-500 font-bold">Close</button>
@@ -227,7 +259,7 @@ const ReportsUserModal = ({ isVisible, onClose }) => {
                         <h3 className="text-xl font-bold">Total of Today's Transactions: ₱{totalForToday.toFixed(2)}</h3>
                         {/* <h3 className="text-xl font-bold">Total for Selected Date Range: ₱{getTotalForDateRange(filteredTransactions).toFixed(2)}</h3> */}
                     </div>
-                    <div id="userTransactions" className="overflow-y-auto max-h-96">
+                    <div id="userTransactions" className="overflow-y-auto max-h-96" ref={tableBarcodeContainerRef}>
                         {filteredTransactions.length === 0 ? (
                             <p>No transactions found.</p>
                         ) : (

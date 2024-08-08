@@ -193,9 +193,9 @@ export default function AdminDashboard({ className }) {
   }
 
   useEffect(() => {
-    if (localStorage.getItem("url") !== "http://localhost/pos/") {
-      localStorage.setItem("url", "http://localhost/pos/");
-    }
+    // if (localStorage.getItem("url") !== "http://192.168.1.2/pos/") {
+    //   localStorage.setItem("url", "http://192.168.1.2/pos/");
+    // }
     if (localStorage.getItem("isLoggedIn") !== "true" || localStorage.getItem("role") !== "admin") {
       router.push("/");
     }

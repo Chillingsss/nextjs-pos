@@ -153,8 +153,10 @@ const Dashboard = ({ isVisible, onClose }) => {
     }, [quantity, barcode]);
 
     const fetchAllProducts = async () => {
+        const url = localStorage.getItem("url") + "products.php";
+
         try {
-            const response = await axios.post('http://localhost/pos/products.php', new URLSearchParams({
+            const response = await axios.post(url, new URLSearchParams({
                 operation: 'getAllProduct',
             }), {
                 headers: {
@@ -270,8 +272,10 @@ const Dashboard = ({ isVisible, onClose }) => {
     useEffect(() => {
         // Fetch the remaining balance when the component mounts
         const fetchRemainingBalance = async () => {
+            const url = localStorage.getItem("url") + "balance.php";
+
             try {
-                const response = await axios.post('http://localhost/pos/balance.php',
+                const response = await axios.post(url,
                     new URLSearchParams({
                         operation: 'getBeginningBalance'
                     }),
@@ -299,8 +303,10 @@ const Dashboard = ({ isVisible, onClose }) => {
 
     useEffect(() => {
         const fetchBeginningBalance = async () => {
+            const url = localStorage.getItem("url") + "balance.php";
+
             try {
-                const response = await axios.post('http://localhost/pos/balance.php', new URLSearchParams({
+                const response = await axios.post(url, new URLSearchParams({
                     operation: 'getBeginningBalance'
                 }), {
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
@@ -320,8 +326,10 @@ const Dashboard = ({ isVisible, onClose }) => {
 
 
     const updateBeginningBalance = async (newBalance) => {
+        const url = localStorage.getItem("url") + "balance.php";
+
         try {
-            const response = await axios.post('http://localhost/pos/balance.php', new URLSearchParams({
+            const response = await axios.post(url, new URLSearchParams({
                 operation: 'updateBeginningBalance',
                 json: JSON.stringify({ amount: newBalance })
             }), {
@@ -384,12 +392,14 @@ const Dashboard = ({ isVisible, onClose }) => {
 
 
     const handleAdminPasswordChange = async (e) => {
+        const url = localStorage.getItem("url") + "user.php";
+
         const password = e.target.value;
         setAdminPassword(password);
 
         if (password.length > 0) {
             try {
-                const response = await axios.post('http://localhost/pos/user.php', new URLSearchParams({
+                const response = await axios.post(url, new URLSearchParams({
                     operation: 'verifyAdminPassword',
                     json: JSON.stringify({ password: password })
                 }), {
@@ -686,6 +696,8 @@ const Dashboard = ({ isVisible, onClose }) => {
 
 
     const handlePaidTransaction = async () => {
+        const url = localStorage.getItem("url") + "sales.php";
+
         console.log("natawag");
         const cash = parseFloat(cashTendered);
 
@@ -730,7 +742,7 @@ const Dashboard = ({ isVisible, onClose }) => {
         }
 
         try {
-            const response = await axios.post('http://localhost/pos/sales.php', new URLSearchParams({
+            const response = await axios.post(url, new URLSearchParams({
                 json: JSON.stringify(transactionData),
                 operation: 'saveTransaction'
             }), {
@@ -987,10 +999,12 @@ const Dashboard = ({ isVisible, onClose }) => {
 
 
     const fetchShiftReport = async (userId) => {
+        const url = localStorage.getItem("url") + "sales.php";
+
         try {
             setLoading(true);
 
-            const response = await axios.post('http://localhost/pos/sales.php', new URLSearchParams({
+            const response = await axios.post(url, new URLSearchParams({
                 operation: 'getShiftReport',
                 json: JSON.stringify({ userId })
             }), {
@@ -1023,6 +1037,8 @@ const Dashboard = ({ isVisible, onClose }) => {
 
     useEffect(() => {
         const fetchData = async () => {
+            const url = localStorage.getItem("url") + "sales.php";
+
             try {
 
                 const userId = localStorage.getItem('user_id');
@@ -1032,7 +1048,7 @@ const Dashboard = ({ isVisible, onClose }) => {
                 }
 
                 // Fetch data
-                const response = await axios.post('http://localhost/pos/sales.php', new URLSearchParams({
+                const response = await axios.post(url, new URLSearchParams({
                     operation: 'getShiftReport',
                     json: JSON.stringify({ userId })
                 }));
@@ -1239,6 +1255,10 @@ const Dashboard = ({ isVisible, onClose }) => {
             document.removeEventListener('keydown', handleKeyDown);
         };
     }, []);
+
+
+
+
 
 
 
@@ -1495,8 +1515,8 @@ const Dashboard = ({ isVisible, onClose }) => {
                                                 <td className="px-6 py-4 whitespace-nowrap text-base">Shift Report</td>
                                             </tr>
                                             <tr>
-                                                <td className="px-6 py-4 whitespace-nowrap text-base">Alt + F3</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-base">Print Receipt</td>
+                                                {/* <td className="px-6 py-4 whitespace-nowrap text-base">Alt + F3</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-base">Print Receipt</td> */}
                                                 <td className="px-6 py-4 whitespace-nowrap text-base">Ctrl + F6</td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-base">Increase/Decrease Quantity</td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-base">Alt + -</td>
@@ -1539,7 +1559,7 @@ const Dashboard = ({ isVisible, onClose }) => {
             </div >
 
             {showVoidModal && (
-                <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 z-50">
+                <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 z-50 text-black">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm">
                         <h2 className="text-xl font-bold mb-4">Void Item</h2>
                         <p className="mb-4">Are you sure you want to void this item?</p>
@@ -1550,7 +1570,7 @@ const Dashboard = ({ isVisible, onClose }) => {
                                 value={adminPassword}
                                 onChange={handleAdminPasswordChange}
                                 id="adminPassword"
-                                className="border text-black rounded-md px-3 py-2 w-full"
+                                className="border text-black rounded-md px-3 py-2 w-full bg-white"
                                 required
                                 autoFocus
                             />

@@ -60,7 +60,7 @@ function ShowSelectedCashier({ report, show, hide }) {
       console.log("JSONDATA NI handleGetReports", JSON.stringify(jsonData));
       const formData = new FormData();
       formData.append("json", JSON.stringify(jsonData));
-      formData.append("operation", "getShiftReport");
+      formData.append("operation", "getShiftAdminReport");
 
       const response = await axios.post(url, formData);
       console.log("DATA NI handleGetReports", response.data);
@@ -82,10 +82,11 @@ function ShowSelectedCashier({ report, show, hide }) {
     if (show) {
       handleGetReports();
     }
+    // console.log("currentItems ", currentItems);
   }, [handleGetReports, show, report]);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = Array.isArray(zReports) ? zReports.slice(indexOfFirstItem, indexOfLastItem) : [];

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 const ReportsUserModal = ({ isVisible, onClose }) => {
@@ -23,10 +23,12 @@ const ReportsUserModal = ({ isVisible, onClose }) => {
     }, [isVisible, userId]);
 
     const fetchShiftReport = async (userId) => {
+        const url = localStorage.getItem("url") + "sales.php";
+
         try {
             setLoading(true);
 
-            const response = await axios.post('http://localhost/pos/sales.php', new URLSearchParams({
+            const response = await axios.post(url, new URLSearchParams({
                 operation: 'getShiftReport',
                 json: JSON.stringify({ userId })
             }), {
@@ -156,6 +158,35 @@ const ReportsUserModal = ({ isVisible, onClose }) => {
     };
 
 
+    const tableBarcodeContainerRef = useRef(null);
+
+
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.altKey) {
+                if (event.key === 'ArrowUp') {
+
+                    if (tableBarcodeContainerRef.current) {
+                        tableBarcodeContainerRef.current.scrollBy({ top: -100, behavior: 'smooth' });
+                    }
+                    event.preventDefault();
+                } else if (event.key === 'ArrowDown') {
+
+                    if (tableBarcodeContainerRef.current) {
+                        tableBarcodeContainerRef.current.scrollBy({ top: 100, behavior: 'smooth' });
+                    }
+                    event.preventDefault();
+                }
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
+
 
     return (
         isVisible && (
@@ -170,7 +201,7 @@ const ReportsUserModal = ({ isVisible, onClose }) => {
                         <h3 className="text-xl font-bold">Total of Today's Transactions: ₱{totalForToday.toFixed(2)}</h3>
 
                     </div>
-                    <div id="userTransactions" className="overflow-y-auto max-h-[700px] flex flex-col items-center">
+                    <div id="userTransactions" className="overflow-y-auto max-h-[700px] flex flex-col items-center" ref={tableBarcodeContainerRef}>
                         {filteredTransactions.length === 0 ? (
                             <p>No transactions found.</p>
                         ) : (

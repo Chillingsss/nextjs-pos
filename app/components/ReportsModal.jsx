@@ -10,8 +10,10 @@ const ReportsModal = ({ isVisible, onClose }) => {
     const [endDate, setEndDate] = useState('');
 
     useEffect(() => {
+        const url = localStorage.getItem("url") + "sales.php";
+
         if (isVisible) {
-            axios.post('http://192.168.1.3/pos/sales.php', new URLSearchParams({
+            axios.post(url, new URLSearchParams({
                 operation: 'getZAllReport'
             }))
                 .then(response => {

@@ -16,6 +16,7 @@ function CashierTab() {
 
 
   const getAllCashiers = async () => {
+    setIsLoading(true);
     try {
       const url = localStorage.getItem("url") + "user.php";
       const formData = new FormData();
@@ -27,6 +28,10 @@ function CashierTab() {
     } catch (error) {
       toast.error("Something went wrong");
       console.log("CashierTab.js => getAllCashiers() error: ", error);
+    } finally {
+      setProgress(98);
+      setIsLoading(false);
+
     }
   };
 
