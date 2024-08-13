@@ -19,6 +19,10 @@ function AddProduct({ refreshData }) {
       const barcode = document.getElementById('barcode').value;
       const name = document.getElementById('name').value;
       const price = document.getElementById('price').value;
+      const stock = document.getElementById('stock').value;
+      const category = document.getElementById('category').value;
+
+
       if (!barcode || !name || !price) {
         toast.error('Please fill in all fields');
         return;
@@ -29,7 +33,9 @@ function AddProduct({ refreshData }) {
       const jsonData = {
         barcode: barcode,
         productName: name,
-        price: price
+        price: price,
+        stock: stock,
+        category: category
       }
 
       formData.append('operation', 'addProduct');
@@ -99,6 +105,26 @@ function AddProduct({ refreshData }) {
             </Label>
             <Input
               id="price"
+              defaultValue={""}
+              className="col-span-2"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="price" className="text-right">
+              Stock
+            </Label>
+            <Input
+              id="stock"
+              defaultValue={""}
+              className="col-span-2"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="category" className="text-right">
+              Category
+            </Label>
+            <Input
+              id="category"
               defaultValue={""}
               className="col-span-2"
             />

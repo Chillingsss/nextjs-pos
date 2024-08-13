@@ -52,7 +52,7 @@ const Login = () => {
                     toast.success('Login successful');
                     router.push(result.data[0].user_level === 'admin' ? '/admin' : '/pos');
                 } else {
-                    toast.error("Login failed");
+                    // toast.error("Login failed");
                 }
             } catch (error) {
                 console.error("Error logging in:", error);

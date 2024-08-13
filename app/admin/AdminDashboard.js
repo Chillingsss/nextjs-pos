@@ -434,6 +434,8 @@ export default function AdminDashboard({ className }) {
                                 <TableHead>Barcode</TableHead>
                                 <TableHead className="text-center">Product</TableHead>
                                 <TableHead className="text-right">Price</TableHead>
+                                <TableHead className="text-right">Stocks</TableHead>
+
                               </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -448,6 +450,9 @@ export default function AdminDashboard({ className }) {
                                   </TableCell>
                                   <TableCell className="text-right">
                                     {product.prod_price}<span> Php</span>
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    {product.prod_stocks}<span> Stocks</span>
                                   </TableCell>
                                 </TableRow>
                               )) : (

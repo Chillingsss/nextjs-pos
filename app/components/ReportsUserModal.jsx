@@ -201,7 +201,7 @@ const ReportsUserModal = ({ isVisible, onClose }) => {
     };
 
 
-    const tableBarcodeContainerRef = useRef(null);
+    const tableReportUserContainerRef = useRef(null);
 
 
     useEffect(() => {
@@ -209,14 +209,14 @@ const ReportsUserModal = ({ isVisible, onClose }) => {
             if (event.altKey) {
                 if (event.key === 'ArrowUp') {
 
-                    if (tableBarcodeContainerRef.current) {
-                        tableBarcodeContainerRef.current.scrollBy({ top: -100, behavior: 'smooth' });
+                    if (tableReportUserContainerRef.current) {
+                        tableReportUserContainerRef.current.scrollBy({ top: -100, behavior: 'smooth' });
                     }
                     event.preventDefault();
                 } else if (event.key === 'ArrowDown') {
 
-                    if (tableBarcodeContainerRef.current) {
-                        tableBarcodeContainerRef.current.scrollBy({ top: 100, behavior: 'smooth' });
+                    if (tableReportUserContainerRef.current) {
+                        tableReportUserContainerRef.current.scrollBy({ top: 100, behavior: 'smooth' });
                     }
                     event.preventDefault();
                 }
@@ -259,7 +259,7 @@ const ReportsUserModal = ({ isVisible, onClose }) => {
                         <h3 className="text-xl font-bold">Total of Today's Transactions: ₱{totalForToday.toFixed(2)}</h3>
                         {/* <h3 className="text-xl font-bold">Total for Selected Date Range: ₱{getTotalForDateRange(filteredTransactions).toFixed(2)}</h3> */}
                     </div>
-                    <div id="userTransactions" className="overflow-y-auto max-h-96" ref={tableBarcodeContainerRef}>
+                    <div id="userTransactions" className="overflow-y-auto max-h-96" ref={tableReportUserContainerRef}>
                         {filteredTransactions.length === 0 ? (
                             <p>No transactions found.</p>
                         ) : (

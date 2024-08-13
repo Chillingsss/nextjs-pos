@@ -154,7 +154,7 @@ const TransactionsModal = ({ isVisible, onClose, onLoadTransaction }) => {
     return (
         <>
             {isVisible && (
-                <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-75">
+                <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-75 text-black">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-2xl font-bold">Saved Transactions</h2>

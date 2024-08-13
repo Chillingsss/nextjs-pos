@@ -210,6 +210,18 @@ const Dashboard = ({ isVisible, onClose }) => {
             return;
         }
 
+        // Check if the product stock is 0
+        if (product.prod_stocks === 0) {
+            toast.error('Unavailable Product: Out of stock');
+            return;
+        }
+
+        // Check if the requested quantity exceeds the available stock
+        if (parsedQuantity > product.prod_stocks) {
+            toast.error(`Out of stock: Only ${product.prod_stocks} available`);
+            return;
+        }
+
         const productId = product.prod_id;
 
         if (parsedQuantity > 0 && productName && productPrice) {
@@ -230,7 +242,7 @@ const Dashboard = ({ isVisible, onClose }) => {
                     );
                 } else {
                     const newItem = {
-                        prod_id: productId, // Use the prod_id from fetched data
+                        prod_id: productId,
                         quantity: parsedQuantity,
                         product: productName,
                         price: parsedPrice,
@@ -246,6 +258,7 @@ const Dashboard = ({ isVisible, onClose }) => {
                     quantityRef.current.focus();
                 }
 
+
                 return updatedItems;
             });
 
@@ -258,6 +271,7 @@ const Dashboard = ({ isVisible, onClose }) => {
             toast.error('Quantity must be greater than 0');
         }
     };
+
 
 
 
@@ -507,7 +521,7 @@ const Dashboard = ({ isVisible, onClose }) => {
         });
     };
 
-    const handleSaveTransaction = () => {
+    const handleSaveTransaction = async () => {
         if (items.length === 0) {
             toast.error("No items to save. Please add items to the transaction.");
             return;
@@ -536,17 +550,43 @@ const Dashboard = ({ isVisible, onClose }) => {
             dateTime
         };
 
-        savedTransactions.push(newTransaction);
-        localStorage.setItem('savedTransactions', JSON.stringify(savedTransactions));
+        try {
+            const response = await fetch('your-backend-url/saveTransaction.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ master: { userId: username, totalAmount: total }, detail: items }),
+            });
 
-        const allTransactions = JSON.parse(localStorage.getItem('savedTransactions')) || [];
-        const allLastId = Math.max(...allTransactions.map(t => t.id), 0);
-        localStorage.setItem('lastTransactionId', allLastId);
+            const result = await response.json();
 
-        setHasUnsavedTransactions(false);
-        setIsTransactionLoaded(false);
-        resetTransaction();
+            if (result.success) {
+                savedTransactions.push(newTransaction);
+                localStorage.setItem('savedTransactions', JSON.stringify(savedTransactions));
+
+                const allTransactions = JSON.parse(localStorage.getItem('savedTransactions')) || [];
+                const allLastId = Math.max(...allTransactions.map(t => t.id), 0);
+                localStorage.setItem('lastTransactionId', allLastId);
+
+                setHasUnsavedTransactions(false);
+                setIsTransactionLoaded(false);
+                resetTransaction();
+
+                toast.success("Transaction saved successfully!");
+            } else {
+                // Check if the error is about unavailable product
+                if (result.error && result.error.includes("Unavailable Product")) {
+                    toast.error(result.error); // This will toast "Unavailable Product: Insufficient stock for product ID X"
+                } else {
+                    toast.error(result.error || "An error occurred while saving the transaction.");
+                }
+            }
+        } catch (error) {
+            toast.error("Failed to save transaction. Please try again.");
+        }
     };
+
 
 
 
@@ -1258,6 +1298,38 @@ const Dashboard = ({ isVisible, onClose }) => {
 
 
 
+    const tableItemsContainerRef = useRef(null);
+
+
+
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.altKey) {
+                if (event.key === 'ArrowUp') {
+
+                    if (tableItemsContainerRef.current) {
+                        tableItemsContainerRef.current.scrollBy({ top: -100, behavior: 'smooth' });
+                    }
+                    event.preventDefault();
+                } else if (event.key === 'ArrowDown') {
+
+                    if (tableItemsContainerRef.current) {
+                        tableItemsContainerRef.current.scrollBy({ top: 100, behavior: 'smooth' });
+                    }
+                    event.preventDefault();
+                }
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
+
+
+
 
 
 
@@ -1437,7 +1509,7 @@ const Dashboard = ({ isVisible, onClose }) => {
                                 <h3 className="text-2xl text-gray-700 font-bold">Current Sale</h3>
                                 <h3 className="text-3xl text-gray-700 font-bold">Total: ₱{total.toFixed(2)}</h3>
                             </div>
-                            <div className="overflow-x-auto h-72">
+                            <div className="overflow-x-auto h-72" ref={tableItemsContainerRef}>
                                 <table className="min-w-full border text-black border-gray-200 shadow-md rounded-md bg-[#262673]">
                                     <thead className="bg-[#262673] text-white">
                                         <tr>

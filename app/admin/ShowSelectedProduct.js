@@ -76,6 +76,16 @@ function ShowSelectedProduct({ report, show, hide }) {
               className="col-span-2"
             />
           </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="name" className="text-right">
+              Product
+            </Label>
+            <Input
+              id="name"
+              defaultValue={report.prod_stocks}
+              className="col-span-2"
+            />
+          </div>
         </div>
         <DialogFooter>
           <Button variant="secondary" onClick={() => hide(false)}>Close</Button>
